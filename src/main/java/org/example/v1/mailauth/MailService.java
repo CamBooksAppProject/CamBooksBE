@@ -18,9 +18,17 @@ public class MailService {
     private static final long EXPIRE_TIME = 3 * 60; // 3분
 
     public void sendAuthCode(String email) {
+        if (!isUniversityEmail(email)) {
+            throw new IllegalArgumentException("대학교 이메일 주소만 인증할 수 있습니다.");
+        }
+
         String code = generateCode();
         saveCodeToRedis(email, code);
         sendEmail(email, code);
+    }
+
+    private boolean isUniversityEmail(String email) {
+        return email.toLowerCase().endsWith(".ac.kr");
     }
 
     private void saveCodeToRedis(String email, String code) {

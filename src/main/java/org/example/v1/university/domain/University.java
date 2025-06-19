@@ -11,6 +11,6 @@ public class University {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;     // "SNU"
-    private String nameKo;   // "서울대학교"
+    private String code;     // "KNU"
+    private String nameKo;   // "강남대학교"
 }
