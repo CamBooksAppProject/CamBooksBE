@@ -1,14 +1,15 @@
 package org.example.v1.post.usedTrade.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.v1.member.domain.Member;
 import org.example.v1.post.domain.Post;
+import org.example.v1.post.image.domain.PostImage;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,4 +36,7 @@ public class UsedTrade extends Post {
         if (price != null) this.price = price;
         if (tradeMethod != null) this.tradeMethod = tradeMethod;
     }
+    @OneToMany(mappedBy = "usedTrade", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> images = new ArrayList<>();
+
 }
