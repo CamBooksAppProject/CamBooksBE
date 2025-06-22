@@ -31,4 +31,7 @@ public abstract class Post {
         this.writer = writer;
         this.createdAt = createdAt;
     }
+    protected void setTitle(String title) {
+        this.title = title;
+    }
 }

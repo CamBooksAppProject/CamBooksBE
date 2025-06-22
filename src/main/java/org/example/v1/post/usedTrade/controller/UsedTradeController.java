@@ -30,4 +30,16 @@ public class UsedTradeController {
     public ResponseEntity<UsedTradeResponseDto> getById(@PathVariable Long postId) {
         return ResponseEntity.ok(usedTradeService.getById(postId));
     }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<UsedTradeResponseDto> update(@PathVariable Long postId, @RequestParam Long memberId, @RequestBody UsedTradeRequestDto dto) {
+        UsedTradeResponseDto updated = usedTradeService.update(postId, memberId, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> delete(@PathVariable Long memberId, @RequestParam Long postId) {
+        usedTradeService.delete(memberId, postId);
+        return ResponseEntity.noContent().build();
+    }
 }
