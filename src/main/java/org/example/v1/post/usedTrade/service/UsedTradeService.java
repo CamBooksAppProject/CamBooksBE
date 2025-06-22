@@ -86,4 +86,41 @@ public class UsedTradeService {
                 ))
                 .toList();
     }
+
+    public UsedTradeResponseDto update(Long postId, Long memberId, UsedTradeRequestDto dto) {
+        UsedTrade post = usedTradeRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+
+        if (!post.getWriter().getId().equals(memberId)) {
+            throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
+        }
+
+        post.updateFields(dto.getTitle(), dto.getContent(), dto.getPrice(), dto.getTradeMethod());
+
+        UsedTrade updated = usedTradeRepository.save(post);
+
+        return new UsedTradeResponseDto(
+                updated.getId(),
+                updated.getTitle(),
+                updated.getContent(),
+                updated.getPrice(),
+                updated.getTradeMethod().toString(),
+                updated.getViewCount(),
+                updated.getWriter().getName(),
+                updated.getWriter().getUniversity().getNameKo(),
+                updated.getClass().getSimpleName(),
+                postLikeRepository.countByPost(updated)
+        );
+    }
+
+    public void delete(Long memberId, Long postId) {
+        UsedTrade post = usedTradeRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+
+        if (!post.getWriter().getId().equals(memberId)) {
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+        }
+
+        usedTradeRepository.delete(post);
+    }
 }
