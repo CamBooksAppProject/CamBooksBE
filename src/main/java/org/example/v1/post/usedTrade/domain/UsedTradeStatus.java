@@ -6,7 +6,8 @@ import org.example.v1.member.domain.Member;
 @Entity
 public class UsedTradeStatus {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
