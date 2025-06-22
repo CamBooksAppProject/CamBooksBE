@@ -3,6 +3,7 @@ package org.example.v1.post.usedTrade.service;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.usedTrade.domain.UsedTrade;
+import org.example.v1.post.usedTrade.dto.UsedTradePreviewDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeRequestDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeResponseDto;
 import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
@@ -69,19 +70,15 @@ public class UsedTradeService {
                 postLikeRepository.countByPost(post)
         );
     }
-    public List<UsedTradeResponseDto> getAll() {
+    public List<UsedTradePreviewDto> getAll() {
         List<UsedTrade> posts = usedTradeRepository.findAll();
         return posts.stream()
-                .map(post -> new UsedTradeResponseDto(
+                .map(post -> new UsedTradePreviewDto(
                         post.getId(),
                         post.getTitle(),
-                        post.getContent(),
                         post.getPrice(),
-                        post.getTradeMethod().toString(),
                         post.getViewCount(),
-                        post.getWriter().getName(),
                         post.getWriter().getUniversity().getNameKo(),
-                        post.getClass().getSimpleName(),
                         postLikeRepository.countByPost(post)
                 ))
                 .toList();
