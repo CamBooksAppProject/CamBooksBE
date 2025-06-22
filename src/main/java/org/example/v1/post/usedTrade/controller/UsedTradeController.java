@@ -1,6 +1,7 @@
 package org.example.v1.post.usedTrade.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.v1.post.usedTrade.dto.UsedTradePreviewDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeRequestDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeResponseDto;
 import org.example.v1.post.usedTrade.service.UsedTradeService;
@@ -22,7 +23,7 @@ public class UsedTradeController {
         return ResponseEntity.ok(usedTradeResponseDto);
     }
     @GetMapping
-    public ResponseEntity<List<UsedTradeResponseDto>> getAll() {
+    public ResponseEntity<List<UsedTradePreviewDto>> getAll() {
         return ResponseEntity.ok(usedTradeService.getAll());
     }
 
