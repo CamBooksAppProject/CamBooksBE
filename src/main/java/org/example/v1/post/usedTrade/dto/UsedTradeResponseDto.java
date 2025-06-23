@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,4 +20,18 @@ public class UsedTradeResponseDto {
     private String university;
     private String postType;
     private long postLikeCount;
+    private List<String> imageUrls;
+
+    public UsedTradeResponseDto(Long id, String title, String content, int price, String tradeMethod, int viewCount, String writerName, String university, String postType, long postLikeCount) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.price = price;
+        this.tradeMethod = tradeMethod;
+        this.viewCount = viewCount;
+        this.writerName = writerName;
+        this.university = university;
+        this.postType = postType;
+        this.postLikeCount = postLikeCount;
+    }
 }

@@ -84,7 +84,15 @@ public class UsedTradeService {
     }
 
     public UsedTradeResponseDto getById(Long postId) {
-        UsedTrade post = usedTradeRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+        UsedTrade post = usedTradeRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+
+        // ✅ 이미지 조회
+        List<PostImage> images = postImageRepository.findByUsedTrade(post);
+        List<String> imageUrls = images.stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+
         return new UsedTradeResponseDto(
                 post.getId(),
                 post.getTitle(),
@@ -95,22 +103,14 @@ public class UsedTradeService {
                 post.getWriter().getName(),
                 post.getWriter().getUniversity().getNameKo(),
                 post.getClass().getSimpleName(),
-                postLikeRepository.countByPost(post)
+                postLikeRepository.countByPost(post),
+                imageUrls
         );
     }
 
     public List<UsedTradePreviewDto> getAll() {
         List<UsedTrade> posts = usedTradeRepository.findAll();
-        return posts.stream()
-                .map(post -> new UsedTradePreviewDto(
-                        post.getId(),
-                        post.getTitle(),
-                        post.getPrice(),
-                        post.getViewCount(),
-                        post.getWriter().getUniversity().getNameKo(),
-                        postLikeRepository.countByPost(post)
-                ))
-                .toList();
+        return getUsedTradePreviewDtos(posts);
     }
 
     public UsedTradeResponseDto update(Long postId, Long memberId, UsedTradeRequestDto dto) {
@@ -149,18 +149,35 @@ public class UsedTradeService {
 
         usedTradeRepository.delete(post);
     }
+
     public List<UsedTradePreviewDto> findByMemberId(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK>"));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+
         List<UsedTrade> myPosts = usedTradeRepository.findByWriter(member);
+
+        return getUsedTradePreviewDtos(myPosts);
+    }
+
+
+    private List<UsedTradePreviewDto> getUsedTradePreviewDtos(List<UsedTrade> myPosts) {
         return myPosts.stream()
-                .map(post -> new UsedTradePreviewDto(
-                        post.getId(),
-                        post.getTitle(),
-                        post.getPrice(),
-                        post.getViewCount(),
-                        post.getWriter().getUniversity().getNameKo(),
-                        postLikeRepository.countByPost(post)
-                ))
+                .map(post -> {
+                    String thumbnail = postImageRepository.findByUsedTrade(post).stream()
+                            .findFirst()
+                            .map(PostImage::getImageUrl)
+                            .orElse(null);
+
+                    return new UsedTradePreviewDto(
+                            post.getId(),
+                            post.getTitle(),
+                            post.getPrice(),
+                            post.getViewCount(),
+                            post.getWriter().getUniversity().getNameKo(),
+                            postLikeRepository.countByPost(post),
+                            thumbnail
+                    );
+                })
                 .toList();
     }
 }

@@ -38,7 +38,7 @@ public class SecurityConfigs {
                         "/swagger-ui/**",
                         "/v3/api-docs/**",                 // swagger JSON endpoint
                         "/swagger-resources/**",          // swagger resource
-                        "/webjars/**").permitAll().anyRequest().authenticated())
+                        "/webjars/**", "/upload/**").permitAll().anyRequest().authenticated())
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
