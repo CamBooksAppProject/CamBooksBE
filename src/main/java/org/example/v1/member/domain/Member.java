@@ -1,10 +1,7 @@
 package org.example.v1.member.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.v1.university.domain.University;
 
 @Entity
@@ -29,10 +26,25 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Setter
     private String nickname;
+
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private University university;
     private String profileImage;
+
+    public void updatePassword(String encodedPassword) {
+        if (encodedPassword == null || encodedPassword.length() < 10) {
+            throw new IllegalArgumentException("비밀번호 형식이 잘못되었습니다.");
+        }
+        this.password = encodedPassword;
+    }
+    public void updateAddress(String address) {
+        if (address == null || address.length() < 10) {
+            throw new IllegalArgumentException("<UNK> <UNK> <UNK>.");
+        }
+        this.address = address;
+    }
 }

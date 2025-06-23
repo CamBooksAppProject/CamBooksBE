@@ -6,6 +6,7 @@ import org.example.v1.mailauth.MailService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.dto.MemberListResDto;
 import org.example.v1.member.dto.MemberLoginRequestDto;
+import org.example.v1.member.dto.MemberResponseDto;
 import org.example.v1.member.dto.MemberSaveReqDto;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.university.repository.UniversityRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -71,5 +73,62 @@ public class MemberService {
             memberListResDtos.add(memberListResDto);
         }
         return memberListResDtos;
+    }
+
+    public String findMemberAddress(String email){
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 이메일입니다."));
+        return member.getAddress();
+    }
+    public String updateMemberAddress(String email, String address){
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 이메일입니다."));
+        member.updateAddress(address);
+        return member.getAddress();
+    }
+
+    public MemberResponseDto getMember(String email){
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 이메일입니다."));
+        MemberResponseDto memberResponseDto = new MemberResponseDto();
+        memberResponseDto.setName(member.getName());
+        memberResponseDto.setEmail(member.getEmail());
+        memberResponseDto.setAddress(member.getAddress());
+        memberResponseDto.setUniversity(member.getUniversity().getNameKo());
+        return memberResponseDto;
+    }
+
+    public void updatePassword(String email, String currentPassword, String newPassword) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+
+        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        if (newPassword.length() < 8) {
+            throw new IllegalArgumentException("새 비밀번호는 최소 8자 이상이어야 합니다.");
+        }
+
+        member.updatePassword(passwordEncoder.encode(newPassword));
+    }
+
+    public void createNickname(String email, String nickname) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+        member.setNickname(nickname);
+    }
+
+    public String getNickname(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+        return member.getNickname();
+    }
+
+    public String updateNickname(String email, String nickname) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+        member.setNickname(nickname);
+        return member.getNickname();
     }
 }
