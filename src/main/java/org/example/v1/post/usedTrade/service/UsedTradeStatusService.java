@@ -40,12 +40,11 @@ public class UsedTradeStatusService {
         UsedTradeStatus usedTradeStatus = usedTradeStatusRepository.findByUsedTrade(post);
 
         if (usedTradeStatus == null) {
-            // 상태가 없는 경우 새로 생성
             usedTradeStatus = new UsedTradeStatus(post, tradeStatusType);
         }
 
         usedTradeStatus.setBuyer(member);
-        usedTradeStatus.setStatus(tradeStatusType); // 상태도 업데이트하는 게 자연스럽습니다
+        usedTradeStatus.setStatus(tradeStatusType);
     }
     public List<UsedTradePreviewDto> findTradePreviewsByBuyerEmail(String email) {
         Member buyer = memberRepository.findByEmail(email)
