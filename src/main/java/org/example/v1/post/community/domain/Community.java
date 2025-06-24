@@ -7,6 +7,7 @@ import org.example.v1.member.domain.Member;
 import org.example.v1.post.domain.Post;
 import org.example.v1.post.image.domain.CommunityImage;
 import org.example.v1.post.image.domain.PostImage;
+import org.example.v1.postLike.domain.PostType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,4 +39,8 @@ public class Community extends Post {
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommunityImage> images = new ArrayList<>();
 
+    @Override
+    public PostType getPostType() {
+        return PostType.COMMUNITY;
+    }
 }

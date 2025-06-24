@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.v1.member.domain.Member;
+import org.example.v1.postLike.domain.PostType;
 
 import java.time.LocalDateTime;
 
@@ -34,4 +35,5 @@ public abstract class Post {
     protected void setTitle(String title) {
         this.title = title;
     }
+    public abstract PostType getPostType();
 }
