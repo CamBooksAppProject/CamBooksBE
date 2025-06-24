@@ -41,3 +41,5 @@ out/
 /upload/used-trade/*
 !/upload/used-trade/.gitkeep
 
+/upload/community/*
+!/upload/community/.gitkeep
