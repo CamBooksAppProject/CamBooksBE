@@ -1,12 +1,18 @@
 package org.example.v1.post.usedTrade.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.v1.member.service.MemberService;
+import org.example.v1.post.usedTrade.domain.TradeStatusType;
+import org.example.v1.post.usedTrade.domain.UsedTradeStatus;
 import org.example.v1.post.usedTrade.dto.UsedTradePreviewDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeRequestDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeResponseDto;
 import org.example.v1.post.usedTrade.service.UsedTradeService;
+import org.example.v1.post.usedTrade.service.UsedTradeStatusService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +24,8 @@ import java.util.List;
 public class UsedTradeController {
 
     private final UsedTradeService usedTradeService;
+    private final MemberService memberService;
+    private final UsedTradeStatusService usedTradeStatusService;
 
     @PostMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UsedTradeResponseDto> create(
@@ -50,9 +58,11 @@ public class UsedTradeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<List<UsedTradePreviewDto>> getByMemberId(@PathVariable Long memberId) {
-        List<UsedTradePreviewDto> myPosts = usedTradeService.findByMemberId(memberId);
-        return ResponseEntity.ok(myPosts);
+
+    @PostMapping("/trade")
+    public ResponseEntity<?> trade(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long postId) {
+        String email = userDetails.getUsername();
+        usedTradeStatusService.updateStatus(postId, email, TradeStatusType.COMPLETED);
+        return ResponseEntity.ok().build();
     }
 }
