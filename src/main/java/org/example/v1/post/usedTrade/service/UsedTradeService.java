@@ -5,11 +5,14 @@ import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.domain.Post;
 import org.example.v1.post.image.domain.PostImage;
 import org.example.v1.post.image.repository.PostImageRepository;
+import org.example.v1.post.usedTrade.domain.TradeStatusType;
 import org.example.v1.post.usedTrade.domain.UsedTrade;
+import org.example.v1.post.usedTrade.domain.UsedTradeStatus;
 import org.example.v1.post.usedTrade.dto.UsedTradePreviewDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeRequestDto;
 import org.example.v1.post.usedTrade.dto.UsedTradeResponseDto;
 import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
+import org.example.v1.post.usedTrade.repository.UsedTradeStatusRepository;
 import org.example.v1.postLike.repository.PostLikeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,12 +31,14 @@ public class UsedTradeService {
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostImageRepository postImageRepository;
+    private final UsedTradeStatusRepository usedTradeStatusRepository;
 
-    public UsedTradeService(UsedTradeRepository usedTradeRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository, PostImageRepository postImageRepository) {
+    public UsedTradeService(UsedTradeRepository usedTradeRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository, PostImageRepository postImageRepository, UsedTradeStatusRepository usedTradeStatusRepository) {
         this.usedTradeRepository = usedTradeRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
         this.postImageRepository = postImageRepository;
+        this.usedTradeStatusRepository = usedTradeStatusRepository;
     }
 
     public UsedTradeResponseDto create(Long memberId, UsedTradeRequestDto dto, List<MultipartFile> images) {
@@ -68,6 +73,9 @@ public class UsedTradeService {
                 }
             }
         }
+
+        UsedTradeStatus status = new UsedTradeStatus(saved, TradeStatusType.AVAILABLE);
+        usedTradeStatusRepository.save(status);
 
         return new UsedTradeResponseDto(
                 saved.getId(),
@@ -150,8 +158,8 @@ public class UsedTradeService {
         usedTradeRepository.delete(post);
     }
 
-    public List<UsedTradePreviewDto> findByMemberId(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public List<UsedTradePreviewDto> getMyUsedTradeListByEmail(String email) {
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
 
         List<UsedTrade> myPosts = usedTradeRepository.findByWriter(member);
