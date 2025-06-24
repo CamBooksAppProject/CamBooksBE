@@ -95,7 +95,6 @@ public class UsedTradeService {
         UsedTrade post = usedTradeRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
 
-        // ✅ 이미지 조회
         List<PostImage> images = postImageRepository.findByUsedTrade(post);
         List<String> imageUrls = images.stream()
                 .map(PostImage::getImageUrl)
