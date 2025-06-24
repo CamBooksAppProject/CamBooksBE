@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.example.v1.member.domain.Member;
 import org.example.v1.post.domain.Post;
 import org.example.v1.post.image.domain.PostImage;
+import org.example.v1.postLike.domain.PostType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,4 +40,8 @@ public class UsedTrade extends Post {
     @OneToMany(mappedBy = "usedTrade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> images = new ArrayList<>();
 
+    @Override
+    public PostType getPostType() {
+        return PostType.USED_TRADE;
+    }
 }

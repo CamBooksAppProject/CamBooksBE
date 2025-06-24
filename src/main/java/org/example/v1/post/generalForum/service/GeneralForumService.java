@@ -2,9 +2,15 @@ package org.example.v1.post.generalForum.service;
 
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.post.community.domain.Community;
+import org.example.v1.post.community.dto.CommunityPreviewDto;
 import org.example.v1.post.generalForum.domain.GeneralForum;
+import org.example.v1.post.generalForum.dto.GeneralForumPreviewDto;
 import org.example.v1.post.generalForum.dto.GeneralForumRequestDto;
+import org.example.v1.post.generalForum.dto.GeneralForumResponseDto;
 import org.example.v1.post.generalForum.repository.GeneralForumRepository;
+import org.example.v1.post.image.domain.CommunityImage;
+import org.example.v1.postLike.repository.PostLikeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,13 +20,14 @@ import java.util.List;
 public class GeneralForumService {
     private final GeneralForumRepository generalForumRepository;
     private final MemberRepository memberRepository;
-
-    public GeneralForumService(GeneralForumRepository generalForumRepository, MemberRepository memberRepository) {
+    private final PostLikeRepository postLikeRepository;
+    public GeneralForumService(GeneralForumRepository generalForumRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository) {
         this.generalForumRepository = generalForumRepository;
         this.memberRepository = memberRepository;
+        this.postLikeRepository = postLikeRepository;
     }
-    public GeneralForum create(Long memberId, GeneralForumRequestDto dto){
-        Member writer = memberRepository.findById(memberId)
+    public GeneralForumPreviewDto create(String email, GeneralForumRequestDto dto){
+        Member writer = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
 
         GeneralForum post = new GeneralForum(
@@ -29,15 +36,46 @@ public class GeneralForumService {
                 LocalDateTime.now(),
                 dto.getContent()
         );
-
-        return generalForumRepository.save(post);
+        generalForumRepository.save(post);
+        return new GeneralForumPreviewDto(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getWriter().getName(),
+                post.getCreatedAt()
+        );
     }
+
     public List<GeneralForum> search(String keyword) {
         return generalForumRepository.findByTitleContaining(keyword);
     }
 
-    public GeneralForum getById(Long postId) {
-        return generalForumRepository.findById(postId)
+    public GeneralForumResponseDto getById(Long postId) {
+        GeneralForum generalForum =  generalForumRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+        return new GeneralForumResponseDto(
+                generalForum.getId(),
+                generalForum.getTitle(),
+                generalForum.getContent(),
+                generalForum.getWriter().getName(),
+                generalForum.getCreatedAt()
+        );
     }
+    public List<GeneralForumPreviewDto> getAll(){
+        List<GeneralForum> generalForums = generalForumRepository.findAll();
+        return getGeneralForumPreviewDtoList(generalForums);
+    }
+    private List<GeneralForumPreviewDto> getGeneralForumPreviewDtoList(List<GeneralForum> generalForums){
+        return generalForums.stream()
+                .map(post->{
+                    return new GeneralForumPreviewDto(
+                            post.getId(),
+                            post.getTitle(),
+                            post.getContent(),
+                            post.getWriter().getName(),
+                            post.getCreatedAt()
+                    );
+                }).toList();
+    }
+
 }
