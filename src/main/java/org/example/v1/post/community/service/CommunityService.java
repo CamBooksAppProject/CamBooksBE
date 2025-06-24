@@ -118,27 +118,6 @@ public class CommunityService {
                         thumbnail
                 );
             }).toList();
-}
-
-//    private List<UsedTradePreviewDto> getUsedTradePreviewDtos(List<UsedTrade> myPosts) {
-//        return myPosts.stream()
-//                .map(post -> {
-//                    String thumbnail = postImageRepository.findByUsedTrade(post).stream()
-//                            .findFirst()
-//                            .map(PostImage::getImageUrl)
-//                            .orElse(null);
-//
-//                    return new UsedTradePreviewDto(
-//                            post.getId(),
-//                            post.getTitle(),
-//                            post.getPrice(),
-//                            post.getViewCount(),
-//                            post.getWriter().getUniversity().getNameKo(),
-//                            postLikeRepository.countByPost(post),
-//                            thumbnail
-//                    );
-//                })
-//                .toList();
-//    }
+    }
 }
 
