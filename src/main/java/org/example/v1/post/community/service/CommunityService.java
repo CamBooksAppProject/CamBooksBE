@@ -46,6 +46,7 @@ public class CommunityService {
                 dto.getRecruitment(),
                 dto.getIntroduction(),
                 dto.getMaxParticipants(),
+                dto.getStartDateTime(),
                 dto.getEndDateTime()
         );
 
@@ -72,6 +73,7 @@ public class CommunityService {
                 saved.getIntroduction(),
                 saved.getCurrentParticipants(),
                 saved.getMaxParticipants(),
+                saved.getStartDateTime(),
                 saved.getEndDateTime()
         );
     }
@@ -94,6 +96,7 @@ public class CommunityService {
                 post.getIntroduction(),
                 post.getCurrentParticipants(),
                 post.getMaxParticipants(),
+                post.getStartDateTime(),
                 post.getEndDateTime(),
                 imageUrls
         );

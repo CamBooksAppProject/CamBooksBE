@@ -17,15 +17,17 @@ public class CommunityResponseDto {
     private String introduction; // 동아리 소개
     private Integer currentParticipants;
     private Integer maxParticipants;
+    private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private List<String> imgUrls;
 
-    public CommunityResponseDto(Long id, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants, LocalDateTime endDateTime) {
+    public CommunityResponseDto(Long id, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.id = id;
         this.region = region;
         this.recruitment = recruitment;
         this.introduction = introduction;
         this.currentParticipants = currentParticipants;
+        this.startDateTime = startDateTime;
         this.maxParticipants = maxParticipants;
         this.endDateTime = endDateTime;
     }
