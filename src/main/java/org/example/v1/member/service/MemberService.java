@@ -4,12 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.example.v1.mailauth.MailService;
 import org.example.v1.member.domain.Member;
-import org.example.v1.member.dto.MemberListResDto;
-import org.example.v1.member.dto.MemberLoginRequestDto;
-import org.example.v1.member.dto.MemberResponseDto;
-import org.example.v1.member.dto.MemberSaveReqDto;
+import org.example.v1.member.dto.*;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.university.repository.UniversityRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -98,18 +96,20 @@ public class MemberService {
         return memberResponseDto;
     }
 
-    public void updatePassword(String email, String currentPassword, String newPassword) {
+    public void checkPassword(String email, String password){
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
-
-        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
         }
+    }
 
+    public void updatePassword(String email, String newPassword) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
         if (newPassword.length() < 8) {
             throw new IllegalArgumentException("새 비밀번호는 최소 8자 이상이어야 합니다.");
         }
-
         member.updatePassword(passwordEncoder.encode(newPassword));
     }
 
@@ -130,5 +130,46 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
         member.setNickname(nickname);
         return member.getNickname();
+    }
+
+    public void checkUnivAndEMail(IdFindRequestDto dto) {
+        String university = dto.getUniversity();
+        String email = dto.getEmail();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("이메일이 존재하지 않습니다."));
+        if(university.isEmpty() || !university.equals(member.getUniversity().getNameKo())) {
+            throw new IllegalStateException("학교 이름을 다시 입력해주십시오.");
+        }
+    }
+    public String validateAuthCodeAndGetUserId(String email, String code) {
+        boolean verified = mailService.verifyCode(email, code);
+        if(!verified) {
+            throw new IllegalStateException("인증 다시 시도하세요");
+        }else{
+            Member member = memberRepository.findByEmail(email)
+                    .orElseThrow(() -> new EntityNotFoundException("시용자 없음"));
+            return member.getMemberId();
+        }
+    }
+    public void checkMemberIdAndEmail(PasswordFindRequestDto dto) {
+        String memberId = dto.getMemberId();
+        String email = dto.getEmail();
+        Member m1 = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 아이디가 존재하지 않음"));
+        Member m2 = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("해당 이메일 존재하지 않음"));
+        if(!m1.getId().equals(m2.getId())) {
+            throw new IllegalStateException("아이디와 이메일의 소유주가 다름");
+        }
+    }
+    public String validateAuthCodeAndGetUserPassword(String email, String code) {
+        boolean verified = mailService.verifyCode(email, code);
+        if(!verified) {
+            throw new IllegalStateException("인증 다시 시도하세요");
+        }else{
+            Member member = memberRepository.findByEmail(email)
+                    .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+            return member.getPassword();
+        }
     }
 }
