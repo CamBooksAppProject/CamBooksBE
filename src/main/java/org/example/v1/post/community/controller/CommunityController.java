@@ -26,7 +26,7 @@ public class CommunityController {
     @PostMapping
     public ResponseEntity<CommunityResponseDto> createCommunity(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestPart CommunityRequestDto dto,
+            @RequestPart(value = "dto") CommunityRequestDto dto,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         String email = userDetails.getUsername();
         CommunityResponseDto communityResponseDto = communityService.create(email, dto, images);
