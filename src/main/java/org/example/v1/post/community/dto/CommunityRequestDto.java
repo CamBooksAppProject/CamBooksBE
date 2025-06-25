@@ -16,5 +16,6 @@ public class CommunityRequestDto {
     private String recruitment;
     private String introduction;
     private Integer maxParticipants;
+    private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
 }
