@@ -1,12 +1,9 @@
 package org.example.v1.member.controller;
 
 import org.example.v1.common.auth.JwtTokenProvider;
-import org.example.v1.member.dto.AddressUpdateRequest;
+import org.example.v1.mailauth.MailService;
+import org.example.v1.member.dto.*;
 import org.example.v1.member.domain.Member;
-import org.example.v1.member.dto.PasswordUpdateRequest;
-import org.example.v1.member.dto.MemberListResDto;
-import org.example.v1.member.dto.MemberLoginRequestDto;
-import org.example.v1.member.dto.MemberSaveReqDto;
 import org.example.v1.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +20,12 @@ import java.util.Map;
 public class MemberController {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final MailService mailService;
 
-    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
+    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, MailService mailService) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.mailService = mailService;
     }
     @PostMapping("/create")
     public ResponseEntity<?> memberCreate(@RequestBody MemberSaveReqDto memberSaveReqDto) {
@@ -59,14 +58,19 @@ public class MemberController {
         return ResponseEntity.ok("address updated");
     }
 
-    @PutMapping("/password")
-    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal UserDetails userDetails,
-                                            @RequestBody PasswordUpdateRequest request) {
+    @PostMapping("/check-password")
+    public ResponseEntity<?> checkPassword(@AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestBody CheckPasswordDto dto) {
         String email = userDetails.getUsername();
-        memberService.updatePassword(email, request.getCurrentPassword(), request.getNewPassword());
+        memberService.checkPassword(email, dto.getPassword());
+        return ResponseEntity.ok("password checked");
+    }
+    @PostMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal UserDetails userDetails,@RequestBody CheckPasswordDto dto) {
+        String email = userDetails.getUsername();
+        memberService.updatePassword(email, dto.getPassword());
         return ResponseEntity.ok("password updated");
     }
-
 
     @PutMapping("/address")
     public ResponseEntity<?> updateAddress(@AuthenticationPrincipal UserDetails userDetails,
@@ -107,5 +111,30 @@ public class MemberController {
         String email = userDetails.getUsername();
         memberService.updateNickname(email, nickname);
         return new ResponseEntity<>("nickname updated", HttpStatus.OK);
+    }
+
+    @PostMapping("/find-id/send")
+    public ResponseEntity<String> sendEmailForIdRecovery(@RequestBody IdFindRequestDto dto) {
+        memberService.checkUnivAndEMail(dto);
+        mailService.sendAuthCode(dto.getEmail());
+        return ResponseEntity.ok("인증 코드가 전송되었습니다.");
+    }
+
+    @PostMapping("/find-id/verified")
+    public ResponseEntity<String> verifyCodeAndReturnId(@RequestParam String email, @RequestParam String code) {
+        String id = memberService.validateAuthCodeAndGetUserId(email, code);
+        return ResponseEntity.ok(id);
+    }
+
+    @PostMapping("/find-password/send")
+    public ResponseEntity<String> sendEmailForPasswordRecovery(@RequestBody PasswordFindRequestDto dto) {
+        memberService.checkMemberIdAndEmail(dto);
+        mailService.sendAuthCode(dto.getEmail());
+        return ResponseEntity.ok("인증 코드가 전송되었습니다.");
+    }
+    @PostMapping("/find-password/verified")
+    public ResponseEntity<String> verifyCodeAndReturnPassword(@RequestParam String email, @RequestParam String code) {
+        String password = memberService.validateAuthCodeAndGetUserPassword(email, code);
+        return ResponseEntity.ok(password);
     }
 }

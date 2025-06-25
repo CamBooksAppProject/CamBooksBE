@@ -35,10 +35,13 @@ public class SecurityConfigs {
                         "/cambooks/member/doLogin",
                         "/cambooks/email/send-code",
                         "/cambooks/email/verify-code",
+                        "/cambooks/member/find-id/send",
+                        "/cambooks/member/find-id/verified",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",                 // swagger JSON endpoint
                         "/swagger-resources/**",          // swagger resource
-                        "/webjars/**", "/upload/**").permitAll().anyRequest().authenticated())
+                        "/webjars/**", "/upload/**"
+                ).permitAll().anyRequest().authenticated())
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

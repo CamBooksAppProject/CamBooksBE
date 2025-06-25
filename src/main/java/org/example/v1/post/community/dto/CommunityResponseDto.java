@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CommunityResponseDto {
     private Long id;
+    private String title;
     private Region region;
     private String recruitment;  // 모집공고
     private String introduction; // 동아리 소개
@@ -21,7 +22,7 @@ public class CommunityResponseDto {
     private LocalDateTime endDateTime;
     private List<String> imgUrls;
 
-    public CommunityResponseDto(Long id, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public CommunityResponseDto(Long id, String title, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.id = id;
         this.region = region;
         this.recruitment = recruitment;

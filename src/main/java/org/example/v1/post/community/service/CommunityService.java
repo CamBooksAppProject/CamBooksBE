@@ -68,6 +68,7 @@ public class CommunityService {
 
         return new CommunityResponseDto(
                 saved.getId(),
+                saved.getTitle(),
                 saved.getRegion(),
                 saved.getRecruitment(),
                 saved.getIntroduction(),
@@ -91,6 +92,7 @@ public class CommunityService {
                 .toList();
         return new CommunityResponseDto(
                 post.getId(),
+                post.getTitle(),
                 post.getRegion(),
                 post.getRecruitment(),
                 post.getIntroduction(),
