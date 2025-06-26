@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class UsedTrade extends Post {
+    @Column(length = 500)
     private String content;
     private Integer price;
     private Integer viewCount;
@@ -43,5 +44,8 @@ public class UsedTrade extends Post {
     @Override
     public PostType getPostType() {
         return PostType.USED_TRADE;
+    }
+    public void increaseView(){
+        this.viewCount++;
     }
 }

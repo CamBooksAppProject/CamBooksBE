@@ -1,5 +1,6 @@
 package org.example.v1.post.generalForum.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class GeneralForum extends Post {
+    @Column(length = 500)
     private String content;
 
     public GeneralForum(String title, Member writer, LocalDateTime createdAt, String content) {
