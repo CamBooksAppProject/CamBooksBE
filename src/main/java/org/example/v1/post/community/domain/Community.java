@@ -21,8 +21,11 @@ public class Community extends Post {
     @Enumerated(EnumType.STRING)
     private Region region;
 
+    @Column(length = 500)
     private String recruitment;  // 모집공고
+    @Column(length = 500)
     private String introduction; // 동아리 소개
+
     private Integer currentParticipants;
     private Integer maxParticipants;
     private LocalDateTime startDateTime;
@@ -46,5 +49,8 @@ public class Community extends Post {
     @Override
     public PostType getPostType() {
         return PostType.COMMUNITY;
+    }
+    public void incrementCurrentParticipants() {
+        this.currentParticipants++;
     }
 }

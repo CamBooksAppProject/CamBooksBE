@@ -42,4 +42,12 @@ public class CommunityController {
         CommunityResponseDto byId = communityService.getById(postId);
         return new ResponseEntity<>(byId, HttpStatus.OK);
     }
+    @GetMapping("/check/{postId}")
+    public ResponseEntity<?> checkWriterIsMe(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId){
+        boolean isMine = communityService.checkWriterIdIsMyId(userDetails.getUsername(), postId);
+        if(!isMine){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

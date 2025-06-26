@@ -99,6 +99,7 @@ public class UsedTradeService {
         List<String> imageUrls = images.stream()
                 .map(PostImage::getImageUrl)
                 .toList();
+        post.increaseView();
 
         return new UsedTradeResponseDto(
                 post.getId(),

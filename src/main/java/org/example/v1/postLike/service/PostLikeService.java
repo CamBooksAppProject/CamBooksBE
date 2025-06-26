@@ -140,6 +140,7 @@ public class PostLikeService {
                 community.getTitle(),
                 community.getRecruitment(),
                 community.getCurrentParticipants(),
+                community.getCreatedAt(),
                 communityImageRepository.findByCommunity(community).stream()
                         .findFirst()
                         .map(CommunityImage::getImageUrl)

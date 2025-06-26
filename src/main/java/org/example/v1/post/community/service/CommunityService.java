@@ -74,6 +74,7 @@ public class CommunityService {
                 saved.getIntroduction(),
                 saved.getCurrentParticipants(),
                 saved.getMaxParticipants(),
+                saved.getCreatedAt(),
                 saved.getStartDateTime(),
                 saved.getEndDateTime()
         );
@@ -98,6 +99,7 @@ public class CommunityService {
                 post.getIntroduction(),
                 post.getCurrentParticipants(),
                 post.getMaxParticipants(),
+                post.getCreatedAt(),
                 post.getStartDateTime(),
                 post.getEndDateTime(),
                 imageUrls
@@ -120,9 +122,16 @@ public class CommunityService {
                         post.getTitle(),
                         post.getRecruitment(),
                         post.getCurrentParticipants(),
+                        post.getCreatedAt(),
                         thumbnail
                 );
             }).toList();
+    }
+    public boolean checkWriterIdIsMyId(String email, Long postId){
+        Member m1 = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK>"));
+        Member m2 = communityRepository.findById(postId).get().getWriter();
+        return m1.getId().equals(m2.getId());
     }
 }
 
