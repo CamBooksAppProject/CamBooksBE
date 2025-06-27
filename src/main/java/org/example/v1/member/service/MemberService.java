@@ -43,8 +43,10 @@ public class MemberService {
         Member newMember = Member.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
+                .nickname(dto.getNickname())
                 .memberId(dto.getMemberId())
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .address(dto.getAddress())
                 .university(universityRepository.findById(dto.getUniversityId()).orElseThrow(
                         () -> new IllegalArgumentException("해당 대학이 존재하지 않습니다.")
                 ))
@@ -162,14 +164,14 @@ public class MemberService {
             throw new IllegalStateException("아이디와 이메일의 소유주가 다름");
         }
     }
-    public String validateAuthCodeAndGetUserPassword(String email, String code) {
+    public boolean validateAuthCode(String email, String code) {
         boolean verified = mailService.verifyCode(email, code);
         if(!verified) {
-            throw new IllegalStateException("인증 다시 시도하세요");
+            return false;
         }else{
             Member member = memberRepository.findByEmail(email)
                     .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
-            return member.getPassword();
+            return true;
         }
     }
 }

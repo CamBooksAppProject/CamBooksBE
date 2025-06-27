@@ -14,6 +14,5 @@ public class UsedTradePreviewDto {
     private int viewCount;
     private String university;
     private long postLikeCount;
-
     private String thumbnailUrl;
 }

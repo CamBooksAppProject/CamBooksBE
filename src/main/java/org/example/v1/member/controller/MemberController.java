@@ -133,8 +133,7 @@ public class MemberController {
         return ResponseEntity.ok("인증 코드가 전송되었습니다.");
     }
     @PostMapping("/find-password/verified")
-    public ResponseEntity<String> verifyCodeAndReturnPassword(@RequestParam String email, @RequestParam String code) {
-        String password = memberService.validateAuthCodeAndGetUserPassword(email, code);
-        return ResponseEntity.ok(password);
+    public boolean verifyCodeAndReturnPassword(@RequestParam String email, @RequestParam String code) {
+        return memberService.validateAuthCode(email, code);
     }
 }
