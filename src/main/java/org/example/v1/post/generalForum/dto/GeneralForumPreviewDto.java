@@ -15,9 +15,8 @@ public class GeneralForumPreviewDto {
     private String content;
     private String writerName;
     private LocalDateTime createdAt;
-    private Long postLikeCount;
+    private long postLikeCount;
     private Long postCommentCount;
-
 
     public GeneralForumPreviewDto(Long id, String title, String content, String writerName, LocalDateTime createdAt) {
         this.id = id;

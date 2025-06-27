@@ -24,10 +24,11 @@ public class PostLikeController {
 
     //좋아요 등록/취소
     @PostMapping
-    public boolean likeOrUnlike(@AuthenticationPrincipal UserDetails userDetails, @RequestBody LikeRequestDto likeRequestDto) {
+    public ResponseEntity<Long> likeOrUnlike(@AuthenticationPrincipal UserDetails userDetails, @RequestBody LikeRequestDto likeRequestDto) {
         String email = userDetails.getUsername();
-        boolean b = postLikeService.likePost(email, likeRequestDto.getPostType(), likeRequestDto.getPostId());
-        return b;
+        postLikeService.likePost(email, likeRequestDto.getPostType(), likeRequestDto.getPostId());
+        long count = postLikeService.countLikes(likeRequestDto.getPostType(), likeRequestDto.getPostId());
+        return ResponseEntity.ok(count);
     }
 
     //좋아요 개수 조회
