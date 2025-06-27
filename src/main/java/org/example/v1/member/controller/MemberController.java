@@ -136,4 +136,9 @@ public class MemberController {
     public boolean verifyCodeAndReturnPassword(@RequestParam String email, @RequestParam String code) {
         return memberService.validateAuthCode(email, code);
     }
+    @PostMapping("/find-password/new-password")
+    public ResponseEntity<?> setNewPassword(@RequestBody ResetPasswordReqDto dto) {
+        memberService.updatePassword(dto.getEmail(), dto.getNewPassword());
+        return ResponseEntity.ok("password updated");
+    }
 }
