@@ -1,5 +1,6 @@
 package org.example.v1.postLike.service;
 
+import org.example.v1.comment.service.CommentService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.community.domain.Community;
@@ -37,8 +38,9 @@ public class PostLikeService {
     private final CommunityRepository communityRepository;
     private final PostImageRepository postImageRepository;
     private final CommunityImageRepository communityImageRepository;
+    private final CommentService commentService;
 
-    public PostLikeService(PostLikeRepository postLikeRepository, MemberRepository memberRepository, UsedTradeRepository usedTradeRepository, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, PostImageRepository postImageRepository, CommunityImageRepository communityImageRepository) {
+    public PostLikeService(PostLikeRepository postLikeRepository, MemberRepository memberRepository, UsedTradeRepository usedTradeRepository, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, PostImageRepository postImageRepository, CommunityImageRepository communityImageRepository, CommentService commentService) {
         this.postLikeRepository = postLikeRepository;
         this.memberRepository = memberRepository;
         this.usedTradeRepository = usedTradeRepository;
@@ -46,6 +48,7 @@ public class PostLikeService {
         this.communityRepository = communityRepository;
         this.postImageRepository = postImageRepository;
         this.communityImageRepository = communityImageRepository;
+        this.commentService = commentService;
     }
 
     @Transactional
@@ -140,6 +143,7 @@ public class PostLikeService {
                 community.getTitle(),
                 community.getRecruitment(),
                 community.getCurrentParticipants(),
+                community.getRegion(),
                 community.getCreatedAt(),
                 communityImageRepository.findByCommunity(community).stream()
                         .findFirst()
@@ -153,7 +157,9 @@ public class PostLikeService {
                 forum.getTitle(),
                 forum.getContent(),
                 forum.getWriter().getName(),
-                forum.getCreatedAt()
+                forum.getCreatedAt(),
+                postLikeRepository.countByPost(forum),
+                commentService.countComment(forum.getId())
         );
     }
 }
