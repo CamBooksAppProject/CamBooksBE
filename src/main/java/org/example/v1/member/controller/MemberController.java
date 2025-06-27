@@ -32,6 +32,14 @@ public class MemberController {
         Member member = memberService.create(memberSaveReqDto);
         return new ResponseEntity<>(member.getMemberId(), HttpStatus.CREATED);
     }
+    @PostMapping("/check-id")
+    public ResponseEntity<?> checkIdExist(@RequestBody CheckIdDto dto) {
+        if (memberService.checkId(dto.getMemberId())) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
 
     @PostMapping("/doLogin")
     public ResponseEntity<?> doLogin(@RequestBody MemberLoginRequestDto memberLoginRequestDto) {

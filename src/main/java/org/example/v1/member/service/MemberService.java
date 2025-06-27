@@ -54,6 +54,14 @@ public class MemberService {
 
         return memberRepository.save(newMember);
     }
+
+    public boolean checkId(String id) {
+        if (memberRepository.findByEmail(id).isPresent()) {
+            return false;
+        }
+        return true;
+    }
+
     public Member login(MemberLoginRequestDto memberLoginRequestDto) {
         Member member = memberRepository.findByMemberId(memberLoginRequestDto.getMemberId()).orElseThrow(()->new EntityNotFoundException("존재하지 않는 ID입니다."));
         if(!passwordEncoder.matches(memberLoginRequestDto.getPassword(), member.getPassword())) {
