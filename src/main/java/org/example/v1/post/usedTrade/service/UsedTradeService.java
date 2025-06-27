@@ -100,6 +100,7 @@ public class UsedTradeService {
                 .map(PostImage::getImageUrl)
                 .toList();
         post.increaseView();
+        usedTradeRepository.save(post);
 
         return new UsedTradeResponseDto(
                 post.getId(),
@@ -118,7 +119,7 @@ public class UsedTradeService {
 
     public List<UsedTradePreviewDto> getAll() {
         List<UsedTrade> posts = usedTradeRepository.findAll();
-        return getUsedTradePreviewDtos(posts);
+        return getUsedTradePreviewDto(posts);
     }
 
     public UsedTradeResponseDto update(Long postId, Long memberId, UsedTradeRequestDto dto) {
@@ -164,11 +165,11 @@ public class UsedTradeService {
 
         List<UsedTrade> myPosts = usedTradeRepository.findByWriter(member);
 
-        return getUsedTradePreviewDtos(myPosts);
+        return getUsedTradePreviewDto(myPosts);
     }
 
 
-    private List<UsedTradePreviewDto> getUsedTradePreviewDtos(List<UsedTrade> myPosts) {
+    private List<UsedTradePreviewDto> getUsedTradePreviewDto(List<UsedTrade> myPosts) {
         return myPosts.stream()
                 .map(post -> {
                     String thumbnail = postImageRepository.findByUsedTrade(post).stream()

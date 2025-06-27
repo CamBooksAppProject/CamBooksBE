@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemberSaveReqDto {
     private String name;
+    private String nickname;
     private String email;
     private String memberId;
     private String password;
     private Long universityId;
+    private String address;
 }
