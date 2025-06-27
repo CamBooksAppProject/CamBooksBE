@@ -56,7 +56,7 @@ public class MemberService {
     }
 
     public boolean checkId(String id) {
-        if (memberRepository.findByEmail(id).isPresent()) {
+        if (memberRepository.findByMemberId(id).isPresent()) {
             return false;
         }
         return true;
