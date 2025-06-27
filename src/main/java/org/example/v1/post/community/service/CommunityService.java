@@ -122,6 +122,7 @@ public class CommunityService {
                         post.getTitle(),
                         post.getRecruitment(),
                         post.getCurrentParticipants(),
+                        post.getRegion(),
                         post.getCreatedAt(),
                         thumbnail
                 );
