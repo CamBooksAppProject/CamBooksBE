@@ -17,7 +17,9 @@ public class GeneralForumResponseDto {
     private String content;
     private String writerName;
     private LocalDateTime createdAt;
+    private long postLikeCount;
     private List<CommentResponseDto> comments;
+    private Long commentsCount;
 
     public GeneralForumResponseDto(Long id, String title, String content, String writerName, LocalDateTime createdAt) {
         this.id = id;

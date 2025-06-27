@@ -45,6 +45,7 @@ public class UsedTradeStatusService {
 
         usedTradeStatus.setBuyer(member);
         usedTradeStatus.setStatus(tradeStatusType);
+        usedTradeStatusRepository.save(usedTradeStatus);
     }
     public List<UsedTradePreviewDto> findTradePreviewsByBuyerEmail(String email) {
         Member buyer = memberRepository.findByEmail(email)

@@ -1,5 +1,7 @@
 package org.example.v1.post.generalForum.service;
 
+import org.example.v1.comment.dto.CommentResponseDto;
+import org.example.v1.comment.service.CommentService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.community.domain.Community;
@@ -21,10 +23,13 @@ public class GeneralForumService {
     private final GeneralForumRepository generalForumRepository;
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
-    public GeneralForumService(GeneralForumRepository generalForumRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository) {
+    private final CommentService commentService;
+
+    public GeneralForumService(GeneralForumRepository generalForumRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository, CommentService commentService) {
         this.generalForumRepository = generalForumRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
+        this.commentService = commentService;
     }
     public GeneralForumPreviewDto create(String email, GeneralForumRequestDto dto){
         Member writer = memberRepository.findByEmail(email)
@@ -58,7 +63,10 @@ public class GeneralForumService {
                 generalForum.getTitle(),
                 generalForum.getContent(),
                 generalForum.getWriter().getName(),
-                generalForum.getCreatedAt()
+                generalForum.getCreatedAt(),
+                postLikeRepository.countByPost(generalForum),
+                commentService.getCommentList(generalForum.getId()),
+                commentService.countComment(generalForum.getId())
         );
     }
     public List<GeneralForumPreviewDto> getAll(){
@@ -73,7 +81,9 @@ public class GeneralForumService {
                             post.getTitle(),
                             post.getContent(),
                             post.getWriter().getName(),
-                            post.getCreatedAt()
+                            post.getCreatedAt(),
+                            postLikeRepository.countByPost(post),
+                            commentService.countComment(post.getId())
                     );
                 }).toList();
     }
