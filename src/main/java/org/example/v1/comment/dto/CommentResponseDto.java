@@ -15,4 +15,12 @@ public class CommentResponseDto {
     private String content;
     private Long count;
     private LocalDateTime createdAt;
+
+    public CommentResponseDto(Long id, String name, String content, LocalDateTime createdAt) {
+        this.id = id;
+        this.name = name;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
 }
+

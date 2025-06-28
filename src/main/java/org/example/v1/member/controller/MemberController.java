@@ -149,4 +149,11 @@ public class MemberController {
         memberService.updatePassword(dto.getEmail(), dto.getNewPassword());
         return ResponseEntity.ok("password updated");
     }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        memberService.deleteMember(email);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
 }

@@ -12,4 +12,5 @@ import java.util.List;
 public interface UsedTradeStatusRepository extends JpaRepository<UsedTradeStatus, Long> {
     List<UsedTradeStatus> findByBuyer(Member buyer);
     UsedTradeStatus findByUsedTrade(UsedTrade usedTrade);
+    void deleteAllByBuyer(Member buyer);
 }

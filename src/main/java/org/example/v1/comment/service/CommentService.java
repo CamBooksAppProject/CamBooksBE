@@ -64,4 +64,16 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK> <UNK>."));
         return commentRepository.countByGeneralForum(generalForum);
     }
+    public List<CommentResponseDto> getMyComment(String email){
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK> <UNK>."));
+        return commentRepository.findByWriter(member).stream()
+                .map(comment -> new CommentResponseDto(
+                        comment.getId(),
+                        comment.getWriter().getName(),
+                        comment.getContent(),
+                        comment.getCreatedAt()
+                ))
+                .toList();
+    }
 }
