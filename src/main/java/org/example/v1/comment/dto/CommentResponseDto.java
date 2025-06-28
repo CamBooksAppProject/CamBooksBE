@@ -15,12 +15,14 @@ public class CommentResponseDto {
     private String content;
     private Long count;
     private LocalDateTime createdAt;
+    private Long postId;
 
-    public CommentResponseDto(Long id, String name, String content, LocalDateTime createdAt) {
+    public CommentResponseDto(Long id, String name, String content, LocalDateTime createdAt, Long postId) {
         this.id = id;
         this.name = name;
         this.content = content;
         this.createdAt = createdAt;
+        this.postId = postId;
     }
 }
 

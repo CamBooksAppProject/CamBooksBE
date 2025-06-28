@@ -42,7 +42,8 @@ public class CommentService {
                 comment.getWriter().getName(),
                 comment.getContent(),
                 commentRepository.countByGeneralForum(generalForum),
-                comment.getCreatedAt()
+                comment.getCreatedAt(),
+                comment.getGeneralForum().getId()
         );
         return commentResponseDto;
     }
@@ -55,7 +56,8 @@ public class CommentService {
                         comment.getWriter().getName(),
                         comment.getContent(),
                         commentRepository.countByGeneralForum(general),
-                        comment.getCreatedAt()
+                        comment.getCreatedAt(),
+                        comment.getGeneralForum().getId()
                 ))
                 .toList();
     }
@@ -72,7 +74,8 @@ public class CommentService {
                         comment.getId(),
                         comment.getWriter().getName(),
                         comment.getContent(),
-                        comment.getCreatedAt()
+                        comment.getCreatedAt(),
+                        comment.getGeneralForum().getId()
                 ))
                 .toList();
     }
