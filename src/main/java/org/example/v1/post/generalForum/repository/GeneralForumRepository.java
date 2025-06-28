@@ -9,4 +9,7 @@ import java.util.List;
 public interface GeneralForumRepository extends PostRepository<GeneralForum> {
     List<GeneralForum> findByTitleContaining(String keyword);
     void deleteAllByWriter(Member writer);
+    //검색
+    List<GeneralForum> findByTitleContainingOrContentContaining(String titleKeyword, String contentKeyword);
+
 }

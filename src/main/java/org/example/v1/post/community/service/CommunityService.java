@@ -8,10 +8,8 @@ import org.example.v1.post.community.dto.CommunityRequestDto;
 import org.example.v1.post.community.dto.CommunityResponseDto;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.example.v1.post.image.domain.CommunityImage;
-import org.example.v1.post.image.domain.PostImage;
 import org.example.v1.post.image.repository.CommunityImageRepository;
-import org.example.v1.post.usedTrade.domain.UsedTrade;
-import org.example.v1.post.usedTrade.dto.UsedTradePreviewDto;
+import org.example.v1.searchResult.dto.SearchResultDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -133,6 +131,21 @@ public class CommunityService {
                 .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK>"));
         Member m2 = communityRepository.findById(postId).get().getWriter();
         return m1.getId().equals(m2.getId());
+    }
+
+    public List<SearchResultDto> searchByKeyword(String keyword) {
+        return communityRepository
+                .findByTitleContaining(keyword)
+                .stream()
+                .map(post -> new SearchResultDto(
+                        "community",
+                        post.getId(),
+                        post.getTitle(),
+                        null,
+                        post.getWriter().getName(),
+                        post.getCreatedAt()
+                ))
+                .toList();
     }
 }
 
