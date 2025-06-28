@@ -35,5 +35,11 @@ public class CommentController {
     public ResponseEntity<Long> countComments(@RequestParam Long postId) {
         return ResponseEntity.ok(commentService.countComment(postId));
     }
+    @GetMapping("/my")
+    public ResponseEntity<List<CommentResponseDto>> getMyComments(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        List<CommentResponseDto> commentList = commentService.getMyComment(email);
+        return ResponseEntity.ok(commentList);
+    }
 
 }

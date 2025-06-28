@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommunityJoinRepository extends JpaRepository<CommunityJoin, Long> {
     boolean existsByCommunityAndParticipant(Community community, Member participant);
+    void deleteAllByParticipant(Member participant);
 }

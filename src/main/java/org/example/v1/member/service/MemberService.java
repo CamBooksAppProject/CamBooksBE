@@ -2,10 +2,17 @@ package org.example.v1.member.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.example.v1.comment.CommentRepository;
 import org.example.v1.mailauth.MailService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.dto.*;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.post.community.repository.CommunityJoinRepository;
+import org.example.v1.post.community.repository.CommunityRepository;
+import org.example.v1.post.generalForum.repository.GeneralForumRepository;
+import org.example.v1.post.usedTrade.domain.UsedTrade;
+import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
+import org.example.v1.postLike.repository.PostLikeRepository;
 import org.example.v1.university.repository.UniversityRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,12 +29,24 @@ public class MemberService {
     private final UniversityRepository universityRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+    private final GeneralForumRepository generalForumRepository;
+    private final CommunityRepository communityRepository;
+    private final UsedTradeRepository usedTradeRepository;
+    private final CommunityJoinRepository communityJoinRepository;
+    private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
 
-    public MemberService(MemberRepository memberRepository, UniversityRepository universityRepository, MailService mailService, PasswordEncoder passwordEncoder) {
+    public MemberService(MemberRepository memberRepository, UniversityRepository universityRepository, MailService mailService, PasswordEncoder passwordEncoder, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, UsedTradeRepository usedTradeRepository, CommunityJoinRepository communityJoinRepository, CommentRepository commentRepository, PostLikeRepository postLikeRepository) {
         this.memberRepository = memberRepository;
         this.universityRepository = universityRepository;
         this.mailService = mailService;
         this.passwordEncoder = passwordEncoder;
+        this.generalForumRepository = generalForumRepository;
+        this.communityRepository = communityRepository;
+        this.usedTradeRepository = usedTradeRepository;
+        this.communityJoinRepository = communityJoinRepository;
+        this.commentRepository = commentRepository;
+        this.postLikeRepository = postLikeRepository;
     }
 
     public Member create(MemberSaveReqDto dto) {
@@ -181,5 +200,16 @@ public class MemberService {
                     .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
             return true;
         }
+    }
+    public void deleteMember(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+        postLikeRepository.deleteAllByMember(member);
+        commentRepository.deleteAllByWriter(member);
+        generalForumRepository.deleteAllByWriter(member);
+        communityJoinRepository.deleteAllByParticipant(member);
+        communityRepository.deleteAllByWriter(member);
+        usedTradeRepository.deleteAllByWriter(member);
+        memberRepository.delete(member);
     }
 }

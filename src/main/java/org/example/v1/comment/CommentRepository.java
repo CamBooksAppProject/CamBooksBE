@@ -14,4 +14,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByWriter(Member writer);
     List<Comment> findByGeneralForum(GeneralForum generalForum);
     Long countByGeneralForum(GeneralForum generalForum);
+    void deleteAllByWriter(Member writer);
 }
