@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GeneralForumService {
@@ -86,6 +87,22 @@ public class GeneralForumService {
                             commentService.countComment(post.getId())
                     );
                 }).toList();
+    }
+
+
+    // 검색
+    public List<GeneralForumPreviewDto> searchByKeyword(String keyword) {
+        List<GeneralForum> results = generalForumRepository.findByTitleContainingOrContentContaining(keyword, keyword);
+
+        return results.stream()
+                .map(post -> new GeneralForumPreviewDto(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getWriter().getName(),
+                        post.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

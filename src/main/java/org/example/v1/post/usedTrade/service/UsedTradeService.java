@@ -2,7 +2,6 @@ package org.example.v1.post.usedTrade.service;
 
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
-import org.example.v1.post.domain.Post;
 import org.example.v1.post.image.domain.PostImage;
 import org.example.v1.post.image.repository.PostImageRepository;
 import org.example.v1.post.usedTrade.domain.TradeStatusType;
@@ -14,6 +13,7 @@ import org.example.v1.post.usedTrade.dto.UsedTradeResponseDto;
 import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
 import org.example.v1.post.usedTrade.repository.UsedTradeStatusRepository;
 import org.example.v1.postLike.repository.PostLikeRepository;
+import org.example.v1.searchResult.dto.SearchResultDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -187,6 +187,21 @@ public class UsedTradeService {
                             thumbnail
                     );
                 })
+                .toList();
+    }
+
+    public List<SearchResultDto> searchByKeyword(String keyword) {
+        return usedTradeRepository
+                .findByTitleContaining(keyword)
+                .stream()
+                .map(post -> new SearchResultDto(
+                        "usedTrade",
+                        post.getId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getWriter().getName(),
+                        post.getCreatedAt()
+                ))
                 .toList();
     }
 }
