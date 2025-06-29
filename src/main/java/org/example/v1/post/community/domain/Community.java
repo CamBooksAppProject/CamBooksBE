@@ -53,4 +53,7 @@ public class Community extends Post {
     public void incrementCurrentParticipants() {
         this.currentParticipants++;
     }
+    public void decrementCurrentParticipants() {
+        this.currentParticipants--;
+    }
 }

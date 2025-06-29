@@ -23,23 +23,28 @@ public class CommunityJoinService {
     }
 
     @Transactional
-    public Integer joinCommunity(String email, Long communityId) {
+    public Integer joinAndLeaveCommunity(String email, Long communityId) {
         Member participant = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new IllegalArgumentException("커뮤니티가 존재하지 않습니다."));
+        return communityJoinRepository.findByCommunityAndParticipant(community, participant)
+                .map(join -> {
+                    communityJoinRepository.delete(join);
+                    community.decrementCurrentParticipants();
+                    communityRepository.save(community);
+                    return community.getCurrentParticipants();
+                })
+                .orElseGet(()->{
+                    if (community.getCurrentParticipants() >= community.getMaxParticipants()) {
+                        throw new IllegalStateException("모집 인원이 가득 찼습니다.");
+                    }
 
-        if (communityJoinRepository.existsByCommunityAndParticipant(community, participant)) {
-            throw new IllegalStateException("이미 신청한 커뮤니티입니다.");
-        }
-
-        if (community.getCurrentParticipants() >= community.getMaxParticipants()) {
-            throw new IllegalStateException("모집 인원이 가득 찼습니다.");
-        }
-
-        CommunityJoin join = new CommunityJoin(null, community, participant);
-        communityJoinRepository.save(join);
-        community.incrementCurrentParticipants();
-        return community.getCurrentParticipants();
+                    CommunityJoin join = new CommunityJoin(null, community, participant);
+                    communityJoinRepository.save(join);
+                    community.incrementCurrentParticipants();
+                    communityRepository.save(community);
+                    return community.getCurrentParticipants();
+                });
     }
 }

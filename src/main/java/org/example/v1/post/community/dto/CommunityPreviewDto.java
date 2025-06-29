@@ -18,4 +18,5 @@ public class CommunityPreviewDto {
     private Region region;
     private LocalDateTime createdAt;
     private String thumbnailUrl;
+    private Long postCommentCount;
 }

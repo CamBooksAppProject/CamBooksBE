@@ -2,7 +2,7 @@ package org.example.v1.member.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.example.v1.comment.CommentRepository;
+import org.example.v1.comment.repository.CommentRepository;
 import org.example.v1.mailauth.MailService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.dto.*;
@@ -10,17 +10,14 @@ import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.community.repository.CommunityJoinRepository;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.example.v1.post.generalForum.repository.GeneralForumRepository;
-import org.example.v1.post.usedTrade.domain.UsedTrade;
 import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
 import org.example.v1.postLike.repository.PostLikeRepository;
 import org.example.v1.university.repository.UniversityRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
