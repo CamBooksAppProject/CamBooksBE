@@ -135,7 +135,7 @@ public class CommunityService {
     }
     public boolean checkWriterIdIsMyId(String email, Long postId){
         Member m1 = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK>"));
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수가 없습니다."));
         Member m2 = communityRepository.findById(postId).get().getWriter();
         return m1.getId().equals(m2.getId());
     }

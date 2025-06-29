@@ -31,7 +31,7 @@ public class CommunityCommentService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
         Community commu = communityRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK>"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글을 찾을 수가 없습니다."));
         CommunityComment comment = CommunityComment.builder()
                 .community(commu)
                 .writer(member)
@@ -51,7 +51,7 @@ public class CommunityCommentService {
     }
     public List<CommentResponseDto> getCommentList(Long postId) {
         Community community = communityRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK>"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글을 찾을 수가 없습니다."));
         return communityCommentRepository.findByCommunity(community).stream()
                 .map(comment -> new CommentResponseDto(
                         comment.getId(),
@@ -65,12 +65,12 @@ public class CommunityCommentService {
     }
     public Long countComment(Long postId) {
         Community community = communityRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK>"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글을 찾을 수가 없습니다."));
         return communityCommentRepository.countByCommunity(community);
     }
     public List<CommentResponseDto> getMyComment(String email){
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK> <UNK>."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수가 없습니다."));
         return communityCommentRepository.findByWriter(member).stream()
                 .map(comment -> new CommentResponseDto(
                         comment.getId(),

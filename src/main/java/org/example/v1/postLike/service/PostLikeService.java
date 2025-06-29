@@ -1,6 +1,7 @@
 package org.example.v1.postLike.service;
 
 import org.example.v1.comment.service.CommentService;
+import org.example.v1.comment.service.CommunityCommentService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.community.domain.Community;
@@ -39,8 +40,9 @@ public class PostLikeService {
     private final PostImageRepository postImageRepository;
     private final CommunityImageRepository communityImageRepository;
     private final CommentService commentService;
+    private final CommunityCommentService communityCommentService;
 
-    public PostLikeService(PostLikeRepository postLikeRepository, MemberRepository memberRepository, UsedTradeRepository usedTradeRepository, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, PostImageRepository postImageRepository, CommunityImageRepository communityImageRepository, CommentService commentService) {
+    public PostLikeService(PostLikeRepository postLikeRepository, MemberRepository memberRepository, UsedTradeRepository usedTradeRepository, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, PostImageRepository postImageRepository, CommunityImageRepository communityImageRepository, CommentService commentService, CommunityCommentService communityCommentService) {
         this.postLikeRepository = postLikeRepository;
         this.memberRepository = memberRepository;
         this.usedTradeRepository = usedTradeRepository;
@@ -49,6 +51,7 @@ public class PostLikeService {
         this.postImageRepository = postImageRepository;
         this.communityImageRepository = communityImageRepository;
         this.commentService = commentService;
+        this.communityCommentService = communityCommentService;
     }
 
     @Transactional
@@ -103,15 +106,15 @@ public class PostLikeService {
             Post post = postLike.getPost();
             PostType type = post.getPostType();
 
-            if (post.getPostType().equals(PostType.USED_TRADE)) {
+            if (type.equals(PostType.USED_TRADE)) {
                 UsedTrade usedTrade = UsedTrade.class.cast(Hibernate.unproxy(post));
                 usedTrades.add(toUsedTradePreviewDto(usedTrade));
 
-            } else if (post.getPostType().equals(PostType.GENERAL_FORUM)) {
+            } else if (type.equals(PostType.GENERAL_FORUM)) {
                 GeneralForum forum = GeneralForum.class.cast(Hibernate.unproxy(post));
                 forums.add(toGeneralForumPreviewDto(forum));
 
-            } else if (post.getPostType().equals(PostType.COMMUNITY)) {
+            } else if (type.equals(PostType.COMMUNITY)) {
                 Community community = Community.class.cast(Hibernate.unproxy(post));
                 communities.add(toCommunityPreviewDto(community));
             }
@@ -149,7 +152,7 @@ public class PostLikeService {
                         .findFirst()
                         .map(CommunityImage::getImageUrl)
                         .orElse(null),
-                commentService.countComment(community.getId())
+                communityCommentService.countComment(community.getId())
         );
     }
     private GeneralForumPreviewDto toGeneralForumPreviewDto(GeneralForum forum) {
