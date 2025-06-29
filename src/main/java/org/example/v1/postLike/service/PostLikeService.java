@@ -148,7 +148,8 @@ public class PostLikeService {
                 communityImageRepository.findByCommunity(community).stream()
                         .findFirst()
                         .map(CommunityImage::getImageUrl)
-                        .orElse(null)
+                        .orElse(null),
+                commentService.countComment(community.getId())
         );
     }
     private GeneralForumPreviewDto toGeneralForumPreviewDto(GeneralForum forum) {

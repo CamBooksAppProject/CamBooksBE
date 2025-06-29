@@ -1,5 +1,7 @@
 package org.example.v1.post.community.service;
 
+import org.example.v1.comment.repository.CommunityCommentRepository;
+import org.example.v1.comment.service.CommunityCommentService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.community.domain.Community;
@@ -26,11 +28,13 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final MemberRepository memberRepository;
     private final CommunityImageRepository communityImageRepository;
+    private final CommunityCommentService communityCommentService;
 
-    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository) {
+    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentService communityCommentService) {
         this.communityRepository = communityRepository;
         this.memberRepository = memberRepository;
         this.communityImageRepository = communityImageRepository;
+        this.communityCommentService = communityCommentService;
     }
     public CommunityResponseDto create(String email, CommunityRequestDto dto, List<MultipartFile> images) {
         Member writer = memberRepository.findByEmail(email)
@@ -100,7 +104,9 @@ public class CommunityService {
                 post.getCreatedAt(),
                 post.getStartDateTime(),
                 post.getEndDateTime(),
-                imageUrls
+                imageUrls,
+                communityCommentService.getCommentList(post.getId()),
+                communityCommentService.countComment(post.getId())
         );
     }
     public List<CommunityPreviewDto> findAll() {
@@ -122,7 +128,8 @@ public class CommunityService {
                         post.getCurrentParticipants(),
                         post.getRegion(),
                         post.getCreatedAt(),
-                        thumbnail
+                        thumbnail,
+                        communityCommentService.countComment(post.getId())
                 );
             }).toList();
     }

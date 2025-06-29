@@ -23,6 +23,6 @@ public class CommunityJoinController {
     @PostMapping("/{communityId}")
     public ResponseEntity<Integer> joinCommunity(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long communityId) {
         String email = userDetails.getUsername();
-        return ResponseEntity.ok(communityJoinService.joinCommunity(email, communityId));
+        return ResponseEntity.ok(communityJoinService.joinAndLeaveCommunity(email, communityId));
     }
 }

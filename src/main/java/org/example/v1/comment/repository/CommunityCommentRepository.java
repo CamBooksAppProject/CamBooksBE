@@ -1,18 +1,18 @@
-package org.example.v1.comment;
+package org.example.v1.comment.repository;
 
 import org.example.v1.comment.domain.Comment;
+import org.example.v1.comment.domain.CommunityComment;
 import org.example.v1.member.domain.Member;
-import org.example.v1.post.domain.Post;
+import org.example.v1.post.community.domain.Community;
 import org.example.v1.post.generalForum.domain.GeneralForum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+public interface CommunityCommentRepository extends JpaRepository<CommunityComment, Long> {
     List<Comment> findByWriter(Member writer);
-    List<Comment> findByGeneralForum(GeneralForum generalForum);
-    Long countByGeneralForum(GeneralForum generalForum);
+    List<Comment> findByCommunity(Community community);
+    Long countByCommunity(Community community);
     void deleteAllByWriter(Member writer);
 }

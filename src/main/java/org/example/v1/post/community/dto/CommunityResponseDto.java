@@ -3,6 +3,7 @@ package org.example.v1.post.community.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.v1.comment.dto.CommentResponseDto;
 import org.example.v1.post.community.domain.Region;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,8 @@ public class CommunityResponseDto {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private List<String> imgUrls;
+    private List<CommentResponseDto> comments;
+    private Long postCommentCount;
 
     public CommunityResponseDto(Long id, String title, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants,LocalDateTime createdAt ,LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.id = id;
