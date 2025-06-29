@@ -59,7 +59,7 @@ public class CommunityCommentService {
                         comment.getContent(),
                         communityCommentRepository.countByCommunity(community),
                         comment.getCreatedAt(),
-                        comment.getGeneralForum().getId()
+                        comment.getCommunity().getId()
                 ))
                 .toList();
     }
@@ -77,7 +77,7 @@ public class CommunityCommentService {
                         comment.getWriter().getName(),
                         comment.getContent(),
                         comment.getCreatedAt(),
-                        comment.getGeneralForum().getId()
+                        comment.getCommunity().getId()
                 ))
                 .toList();
     }

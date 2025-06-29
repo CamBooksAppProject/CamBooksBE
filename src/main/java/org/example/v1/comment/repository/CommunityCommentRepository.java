@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface CommunityCommentRepository extends JpaRepository<CommunityComment, Long> {
-    List<Comment> findByWriter(Member writer);
-    List<Comment> findByCommunity(Community community);
+    List<CommunityComment> findByWriter(Member writer);
+    List<CommunityComment> findByCommunity(Community community);
     Long countByCommunity(Community community);
     void deleteAllByWriter(Member writer);
 }
