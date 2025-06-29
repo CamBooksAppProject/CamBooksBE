@@ -21,8 +21,9 @@ public class UsedTradeResponseDto {
     private String postType;
     private long postLikeCount;
     private List<String> imageUrls;
+    private Long userId;
 
-    public UsedTradeResponseDto(Long id, String title, String content, int price, String tradeMethod, int viewCount, String writerName, String university, String postType, long postLikeCount) {
+    public UsedTradeResponseDto(Long id, String title, String content, int price, String tradeMethod, int viewCount, String writerName, String university, String postType, long postLikeCount, Long userId) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -33,5 +34,6 @@ public class UsedTradeResponseDto {
         this.university = university;
         this.postType = postType;
         this.postLikeCount = postLikeCount;
+        this.userId = userId;
     }
 }

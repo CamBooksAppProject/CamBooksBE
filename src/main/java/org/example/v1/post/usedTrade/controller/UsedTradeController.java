@@ -52,17 +52,16 @@ public class UsedTradeController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{memberId}")
-    public ResponseEntity<Void> delete(@PathVariable Long memberId, @RequestParam Long postId) {
-        usedTradeService.delete(memberId, postId);
-        return ResponseEntity.noContent().build();
-    }
-
-
     @PostMapping("/trade")
     public ResponseEntity<?> trade(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long postId) {
         String email = userDetails.getUsername();
         usedTradeStatusService.updateStatus(postId, email, TradeStatusType.COMPLETED);
+        return ResponseEntity.ok().build();
+    }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> delete(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId) {
+        String email = userDetails.getUsername();
+        usedTradeService.deleteByPostId(email, postId);
         return ResponseEntity.ok().build();
     }
 }

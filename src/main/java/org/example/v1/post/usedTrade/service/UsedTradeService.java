@@ -1,5 +1,6 @@
 package org.example.v1.post.usedTrade.service;
 
+import jakarta.transaction.Transactional;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.image.domain.PostImage;
@@ -87,7 +88,8 @@ public class UsedTradeService {
                 saved.getWriter().getName(),
                 saved.getWriter().getUniversity().toString(),
                 saved.getClass().toString(),
-                postLikeRepository.countByPost(post)
+                postLikeRepository.countByPost(post),
+                saved.getWriter().getId()
         );
     }
 
@@ -113,7 +115,8 @@ public class UsedTradeService {
                 post.getWriter().getUniversity().getNameKo(),
                 post.getClass().getSimpleName(),
                 postLikeRepository.countByPost(post),
-                imageUrls
+                imageUrls,
+                post.getWriter().getId()
         );
     }
 
@@ -144,19 +147,9 @@ public class UsedTradeService {
                 updated.getWriter().getName(),
                 updated.getWriter().getUniversity().getNameKo(),
                 updated.getClass().getSimpleName(),
-                postLikeRepository.countByPost(updated)
+                postLikeRepository.countByPost(updated),
+                updated.getWriter().getId()
         );
-    }
-
-    public void delete(Long memberId, Long postId) {
-        UsedTrade post = usedTradeRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
-
-        if (!post.getWriter().getId().equals(memberId)) {
-            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
-        }
-
-        usedTradeRepository.delete(post);
     }
 
     public List<UsedTradePreviewDto> getMyUsedTradeListByEmail(String email) {
@@ -203,5 +196,19 @@ public class UsedTradeService {
                         post.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public void deleteByPostId(String email, Long postId) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+        UsedTrade usedTrade = usedTradeRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 아이디의 중고거래글 x"));
+        if (!usedTrade.getWriter().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("작성자만 지울 수 있습니다.");
+        }
+        postLikeRepository.deleteAllByPost(usedTrade);
+        usedTradeStatusRepository.deleteAllByUsedTrade(usedTrade);
+        usedTradeRepository.delete(usedTrade);
     }
 }

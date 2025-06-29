@@ -1,5 +1,6 @@
 package org.example.v1.comment.service;
 
+import jakarta.transaction.Transactional;
 import org.example.v1.comment.domain.Comment;
 import org.example.v1.comment.domain.CommunityComment;
 import org.example.v1.comment.dto.CommentRequestDto;
@@ -27,6 +28,7 @@ public class CommunityCommentService {
         this.memberRepository = memberRepository;
         this.communityRepository = communityRepository;
     }
+
     public CommentResponseDto createComment(String email, Long postId, CommentRequestDto commentRequestDto) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
@@ -45,10 +47,12 @@ public class CommunityCommentService {
                 comment.getContent(),
                 communityCommentRepository.countByCommunity(commu),
                 comment.getCreatedAt(),
-                comment.getCommunity().getId()
+                comment.getCommunity().getId(),
+                comment.getWriter().getId()
         );
         return commentResponseDto;
     }
+
     public List<CommentResponseDto> getCommentList(Long postId) {
         Community community = communityRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글을 찾을 수가 없습니다."));
@@ -59,15 +63,18 @@ public class CommunityCommentService {
                         comment.getContent(),
                         communityCommentRepository.countByCommunity(community),
                         comment.getCreatedAt(),
-                        comment.getCommunity().getId()
+                        comment.getCommunity().getId(),
+                        comment.getWriter().getId()
                 ))
                 .toList();
     }
+
     public Long countComment(Long postId) {
         Community community = communityRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글을 찾을 수가 없습니다."));
         return communityCommentRepository.countByCommunity(community);
     }
+
     public List<CommentResponseDto> getMyComment(String email){
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수가 없습니다."));
@@ -77,8 +84,15 @@ public class CommunityCommentService {
                         comment.getWriter().getName(),
                         comment.getContent(),
                         comment.getCreatedAt(),
-                        comment.getCommunity().getId()
+                        comment.getCommunity().getId(),
+                        comment.getWriter().getId()
                 ))
                 .toList();
+    }
+    @Transactional
+    public void deleteAllByCommunity(Long communityId) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티가 없습니다."));
+        communityCommentRepository.deleteAllByCommunity(community);
     }
 }

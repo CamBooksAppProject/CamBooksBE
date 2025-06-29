@@ -1,5 +1,6 @@
 package org.example.v1.post.community.service;
 
+import jakarta.transaction.Transactional;
 import org.example.v1.comment.repository.CommunityCommentRepository;
 import org.example.v1.comment.service.CommunityCommentService;
 import org.example.v1.member.domain.Member;
@@ -11,6 +12,7 @@ import org.example.v1.post.community.dto.CommunityResponseDto;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.example.v1.post.image.domain.CommunityImage;
 import org.example.v1.post.image.repository.CommunityImageRepository;
+import org.example.v1.postLike.repository.PostLikeRepository;
 import org.example.v1.searchResult.dto.SearchResultDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,13 +30,17 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final MemberRepository memberRepository;
     private final CommunityImageRepository communityImageRepository;
+    private final CommunityCommentRepository communityCommentRepository;
     private final CommunityCommentService communityCommentService;
+    private final PostLikeRepository postLikeRepository;
 
-    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentService communityCommentService) {
+    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentRepository communityCommentRepository, CommunityCommentService communityCommentService, PostLikeRepository postLikeRepository) {
         this.communityRepository = communityRepository;
         this.memberRepository = memberRepository;
         this.communityImageRepository = communityImageRepository;
+        this.communityCommentRepository = communityCommentRepository;
         this.communityCommentService = communityCommentService;
+        this.postLikeRepository = postLikeRepository;
     }
     public CommunityResponseDto create(String email, CommunityRequestDto dto, List<MultipartFile> images) {
         Member writer = memberRepository.findByEmail(email)
@@ -78,7 +84,8 @@ public class CommunityService {
                 saved.getMaxParticipants(),
                 saved.getCreatedAt(),
                 saved.getStartDateTime(),
-                saved.getEndDateTime()
+                saved.getEndDateTime(),
+                saved.getWriter().getId()
         );
     }
 
@@ -106,7 +113,8 @@ public class CommunityService {
                 post.getEndDateTime(),
                 imageUrls,
                 communityCommentService.getCommentList(post.getId()),
-                communityCommentService.countComment(post.getId())
+                communityCommentService.countComment(post.getId()),
+                post.getWriter().getId()
         );
     }
     public List<CommunityPreviewDto> findAll() {
@@ -153,6 +161,21 @@ public class CommunityService {
                         post.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public void deleteCommunity(String email, Long postId) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
+        Community community = communityRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글 없음"));
+        if(community.getWriter().getId().equals(member.getId())){
+            communityCommentRepository.deleteAllByCommunity(community);
+            postLikeRepository.deleteAllByPost(community);
+            communityRepository.delete(community);
+        }else{
+            throw new IllegalArgumentException("삭제가 불가능합니다.");
+        }
     }
 }
 

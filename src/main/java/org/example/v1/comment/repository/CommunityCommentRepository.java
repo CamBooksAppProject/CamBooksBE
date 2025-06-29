@@ -15,4 +15,5 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
     List<CommunityComment> findByCommunity(Community community);
     Long countByCommunity(Community community);
     void deleteAllByWriter(Member writer);
+    void deleteAllByCommunity(Community community);
 }
