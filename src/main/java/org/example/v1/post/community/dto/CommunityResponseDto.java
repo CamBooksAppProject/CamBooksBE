@@ -25,9 +25,11 @@ public class CommunityResponseDto {
     private List<String> imgUrls;
     private List<CommentResponseDto> comments;
     private Long postCommentCount;
+    private Long userId;
 
-    public CommunityResponseDto(Long id, String title, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants,LocalDateTime createdAt ,LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public CommunityResponseDto(Long id, String title, Region region, String recruitment, String introduction, Integer currentParticipants, Integer maxParticipants,LocalDateTime createdAt ,LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId) {
         this.id = id;
+        this.title = title;
         this.region = region;
         this.recruitment = recruitment;
         this.introduction = introduction;
@@ -36,6 +38,7 @@ public class CommunityResponseDto {
         this.createdAt = createdAt;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
+        this.userId = userId;
     }
 }
 

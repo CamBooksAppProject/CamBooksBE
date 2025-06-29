@@ -1,5 +1,6 @@
 package org.example.v1.comment.service;
 
+import jakarta.transaction.Transactional;
 import org.example.v1.comment.repository.CommentRepository;
 import org.example.v1.comment.domain.Comment;
 import org.example.v1.comment.dto.CommentRequestDto;
@@ -42,7 +43,8 @@ public class CommentService {
                 comment.getContent(),
                 commentRepository.countByGeneralForum(generalForum),
                 comment.getCreatedAt(),
-                comment.getGeneralForum().getId()
+                comment.getGeneralForum().getId(),
+                comment.getWriter().getId()
         );
         return commentResponseDto;
     }
@@ -56,7 +58,8 @@ public class CommentService {
                         comment.getContent(),
                         commentRepository.countByGeneralForum(general),
                         comment.getCreatedAt(),
-                        comment.getGeneralForum().getId()
+                        comment.getGeneralForum().getId(),
+                        comment.getWriter().getId()
                 ))
                 .toList();
     }
@@ -74,8 +77,27 @@ public class CommentService {
                         comment.getWriter().getName(),
                         comment.getContent(),
                         comment.getCreatedAt(),
-                        comment.getGeneralForum().getId()
+                        comment.getGeneralForum().getId(),
+                        comment.getWriter().getId()
                 ))
                 .toList();
+    }
+    @Transactional
+    public void deleteAllGeneralForum(Long postId) {
+        GeneralForum generalForum = generalForumRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 자유게시판 글이 존재하지 않습니다."));
+        commentRepository.deleteAllByGeneralForum(generalForum);
+    }
+
+    @Transactional
+    public void deleteComment(String email, Long commentId) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수가 없습니다."));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니댜."));
+        if(!comment.getWriter().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("댓글 작성자가 아닙니다.");
+        }
+        commentRepository.deleteById(commentId);
     }
 }

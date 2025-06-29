@@ -1,5 +1,6 @@
 package org.example.v1.post.generalForum.service;
 
+import jakarta.transaction.Transactional;
 import org.example.v1.comment.dto.CommentResponseDto;
 import org.example.v1.comment.service.CommentService;
 import org.example.v1.member.domain.Member;
@@ -67,7 +68,8 @@ public class GeneralForumService {
                 generalForum.getCreatedAt(),
                 postLikeRepository.countByPost(generalForum),
                 commentService.getCommentList(generalForum.getId()),
-                commentService.countComment(generalForum.getId())
+                commentService.countComment(generalForum.getId()),
+                generalForum.getWriter().getId()
         );
     }
     public List<GeneralForumPreviewDto> getAll(){
@@ -103,6 +105,16 @@ public class GeneralForumService {
                         post.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
+    }
+    @Transactional
+    public void deleteByGeneralForumId(String email, Long generalForumId) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다"));
+        GeneralForum generalForum = generalForumRepository.findById(generalForumId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 자유게시판 글이 존재하지 않습니다."));
+        commentService.deleteAllGeneralForum(generalForum.getId());
+        postLikeRepository.deleteAllByPost(generalForum);
+        generalForumRepository.delete(generalForum);
     }
 
 }

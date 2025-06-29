@@ -13,4 +13,5 @@ public interface UsedTradeStatusRepository extends JpaRepository<UsedTradeStatus
     List<UsedTradeStatus> findByBuyer(Member buyer);
     UsedTradeStatus findByUsedTrade(UsedTrade usedTrade);
     void deleteAllByBuyer(Member buyer);
+    void deleteAllByUsedTrade(UsedTrade usedTrade);
 }

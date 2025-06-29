@@ -41,4 +41,10 @@ public class CommentController {
         List<CommentResponseDto> commentList = commentService.getMyComment(email);
         return ResponseEntity.ok(commentList);
     }
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long commentId) {
+        String email = userDetails.getUsername();
+        commentService.deleteComment(email, commentId);
+        return ResponseEntity.noContent().build();
+    }
 }

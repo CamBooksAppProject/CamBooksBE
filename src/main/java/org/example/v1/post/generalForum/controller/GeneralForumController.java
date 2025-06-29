@@ -37,4 +37,10 @@ public class GeneralForumController {
         GeneralForumResponseDto byId = generalForumService.getById(postId);
         return ResponseEntity.ok(byId);
     }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deleteGeneralForum(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId) {
+        String email = userDetails.getUsername();
+        generalForumService.deleteByGeneralForumId(email, postId);
+        return ResponseEntity.ok().build();
+    }
 }

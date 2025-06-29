@@ -37,7 +37,7 @@ public class CommunityController {
         List<CommunityPreviewDto> all = communityService.findAll();
         return new ResponseEntity<>(all, HttpStatus.OK);
     }
-    @GetMapping("{postId}")
+    @GetMapping("/{postId}")
     public ResponseEntity<CommunityResponseDto> getCommunity(@PathVariable Long postId){
         CommunityResponseDto byId = communityService.getById(postId);
         return new ResponseEntity<>(byId, HttpStatus.OK);
@@ -48,6 +48,12 @@ public class CommunityController {
         if(!isMine){
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deleteCommunity(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId){
+        String email = userDetails.getUsername();
+        communityService.deleteCommunity(email, postId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

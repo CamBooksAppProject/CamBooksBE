@@ -20,12 +20,14 @@ public class GeneralForumResponseDto {
     private long postLikeCount;
     private List<CommentResponseDto> comments;
     private Long commentsCount;
+    private Long userId;
 
-    public GeneralForumResponseDto(Long id, String title, String content, String writerName, LocalDateTime createdAt) {
+    public GeneralForumResponseDto(Long id, String title, String content, String writerName, LocalDateTime createdAt, Long userId) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.writerName = writerName;
         this.createdAt = createdAt;
+        this.userId = userId;
     }
 }
