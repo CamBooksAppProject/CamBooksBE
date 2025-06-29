@@ -28,7 +28,7 @@ public class CommentService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
         GeneralForum generalForum = generalForumRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK>"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 자유게시판 글을 찾을 수가 없습니다."));
         Comment comment = Comment.builder()
                 .generalForum(generalForum)
                 .writer(member)
@@ -62,12 +62,12 @@ public class CommentService {
     }
     public Long countComment(Long postId) {
         GeneralForum generalForum = generalForumRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK> <UNK>."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 자유게시판 글을 찾을 수가 없습니다."));
         return commentRepository.countByGeneralForum(generalForum);
     }
     public List<CommentResponseDto> getMyComment(String email){
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK> <UNK>."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수가 없습니다."));
         return commentRepository.findByWriter(member).stream()
                 .map(comment -> new CommentResponseDto(
                         comment.getId(),
