@@ -95,4 +95,16 @@ public class CommunityCommentService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티가 없습니다."));
         communityCommentRepository.deleteAllByCommunity(community);
     }
+
+    @Transactional
+    public void deleteComment(String email, Long commentId) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수가 없습니다."));
+        CommunityComment comment = communityCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다."));
+        if(!member.getId().equals(comment.getWriter().getId())) {
+            throw new IllegalArgumentException("댓글 작성자가 아닙니다.");
+        }
+        communityCommentRepository.delete(comment);
+    }
 }

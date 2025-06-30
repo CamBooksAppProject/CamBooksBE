@@ -177,5 +177,25 @@ public class CommunityService {
             throw new IllegalArgumentException("삭제가 불가능합니다.");
         }
     }
+
+    public void updateCommunity(String email, Long postId, CommunityRequestDto communityRequestDto) {
+        Member member  = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
+        Community community = communityRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글 없음"));
+        if(!community.getWriter().getId().equals(member.getId())){
+            throw new IllegalArgumentException("커뮤니티글 작성자가 아닙니다.");
+        }
+        community.updateField(
+                communityRequestDto.getTitle(),
+                communityRequestDto.getRegion(),
+                communityRequestDto.getRecruitment(),
+                communityRequestDto.getIntroduction(),
+                communityRequestDto.getMaxParticipants(),
+                communityRequestDto.getStartDateTime(),
+                communityRequestDto.getEndDateTime()
+        );
+        communityRepository.save(community);
+    }
 }
 

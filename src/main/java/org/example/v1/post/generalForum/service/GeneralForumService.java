@@ -117,4 +117,16 @@ public class GeneralForumService {
         generalForumRepository.delete(generalForum);
     }
 
+    public void update(String email, Long postId,GeneralForumRequestDto dto) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다"));
+        GeneralForum generalForum = generalForumRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 자유게시판 글이 존재하지 않습니다."));
+        if (!generalForum.getWriter().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("해당 자유게시판 글 작성자가 아닙니다.");
+        }
+        generalForum.update(dto.getTitle(), dto.getContent());
+        generalForumRepository.save(generalForum);
+    }
+
 }

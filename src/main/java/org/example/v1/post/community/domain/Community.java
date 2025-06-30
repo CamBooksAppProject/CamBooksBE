@@ -56,4 +56,13 @@ public class Community extends Post {
     public void decrementCurrentParticipants() {
         this.currentParticipants--;
     }
+    public void updateField(String title, Region region, String recruitment, String introduction, Integer maxParticipants, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        super.setTitle(title);
+        this.region = region;
+        this.recruitment = recruitment;
+        this.introduction = introduction;
+        this.maxParticipants = maxParticipants;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+    }
 }
