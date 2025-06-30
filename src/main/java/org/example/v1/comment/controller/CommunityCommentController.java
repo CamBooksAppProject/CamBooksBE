@@ -41,4 +41,10 @@ public class CommunityCommentController {
         List<CommentResponseDto> commentList = communityCommentService.getMyComment(email);
         return ResponseEntity.ok(commentList);
     }
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long commentId) {
+        String email = userDetails.getUsername();
+        communityCommentService.deleteComment(email, commentId);
+        return ResponseEntity.ok().build();
+    }
 }

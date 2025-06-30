@@ -7,6 +7,8 @@ import org.example.v1.post.generalForum.dto.GeneralForumResponseDto;
 import org.example.v1.post.generalForum.service.GeneralForumService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +43,12 @@ public class GeneralForumController {
     public ResponseEntity<?> deleteGeneralForum(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId) {
         String email = userDetails.getUsername();
         generalForumService.deleteByGeneralForumId(email, postId);
+        return ResponseEntity.ok().build();
+    }
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updateGeneralForum(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId, @RequestBody GeneralForumRequestDto generalForumRequestDto) {
+        String email = userDetails.getUsername();
+        generalForumService.update(email, postId, generalForumRequestDto);
         return ResponseEntity.ok().build();
     }
 }

@@ -56,4 +56,10 @@ public class CommunityController {
         communityService.deleteCommunity(email, postId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updateCommunity(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long postId, @RequestBody CommunityRequestDto dto){
+        String email = userDetails.getUsername();
+        communityService.updateCommunity(email, postId, dto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -26,4 +26,9 @@ public class GeneralForum extends Post {
     public PostType getPostType() {
         return PostType.GENERAL_FORUM;
     }
+
+    public void update(String title, String content) {
+        super.setTitle(title);
+        this.content = content;
+    }
 }
