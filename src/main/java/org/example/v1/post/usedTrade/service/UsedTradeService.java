@@ -52,6 +52,7 @@ public class UsedTradeService {
                 LocalDateTime.now(),
                 dto.getContent(),
                 dto.getPrice(),
+                dto.getIsbn(),
                 0,
                 dto.getTradeMethod()
         );
@@ -89,13 +90,15 @@ public class UsedTradeService {
                 saved.getWriter().getUniversity().toString(),
                 saved.getClass().toString(),
                 postLikeRepository.countByPost(post),
-                saved.getWriter().getId()
+                saved.getWriter().getId(),
+                status.getStatus()
         );
     }
 
     public UsedTradeResponseDto getById(Long postId) {
         UsedTrade post = usedTradeRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+        UsedTradeStatus status = usedTradeStatusRepository.findByUsedTrade(post);
 
         List<PostImage> images = postImageRepository.findByUsedTrade(post);
         List<String> imageUrls = images.stream()
@@ -116,7 +119,8 @@ public class UsedTradeService {
                 post.getClass().getSimpleName(),
                 postLikeRepository.countByPost(post),
                 imageUrls,
-                post.getWriter().getId()
+                post.getWriter().getId(),
+                status.getStatus()
         );
     }
 
@@ -136,6 +140,7 @@ public class UsedTradeService {
         post.updateFields(dto.getTitle(), dto.getContent(), dto.getPrice(), dto.getTradeMethod());
 
         UsedTrade updated = usedTradeRepository.save(post);
+        TradeStatusType status = usedTradeStatusRepository.findByUsedTrade(post).getStatus();
 
         return new UsedTradeResponseDto(
                 updated.getId(),
@@ -148,7 +153,8 @@ public class UsedTradeService {
                 updated.getWriter().getUniversity().getNameKo(),
                 updated.getClass().getSimpleName(),
                 postLikeRepository.countByPost(updated),
-                updated.getWriter().getId()
+                updated.getWriter().getId(),
+                status
         );
     }
 
@@ -169,6 +175,7 @@ public class UsedTradeService {
                             .findFirst()
                             .map(PostImage::getImageUrl)
                             .orElse(null);
+                    TradeStatusType status = usedTradeStatusRepository.findByUsedTrade(post).getStatus();
 
                     return new UsedTradePreviewDto(
                             post.getId(),
@@ -177,7 +184,8 @@ public class UsedTradeService {
                             post.getViewCount(),
                             post.getWriter().getUniversity().getNameKo(),
                             postLikeRepository.countByPost(post),
-                            thumbnail
+                            thumbnail,
+                            status
                     );
                 })
                 .toList();

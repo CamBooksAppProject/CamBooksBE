@@ -23,6 +23,7 @@ public abstract class Post {
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id", nullable=false)
     private Member writer;
 
     private LocalDateTime createdAt;

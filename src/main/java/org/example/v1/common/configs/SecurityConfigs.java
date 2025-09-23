@@ -41,6 +41,7 @@ public class SecurityConfigs {
                         "/cambooks/member/find-password/verified",
                         "/cambooks/member/find-password/new-password",
                         "/cambooks/member/check-id",
+                        "/connect/**",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",                 // swagger JSON endpoint
                         "/swagger-resources/**",          // swagger resource

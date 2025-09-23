@@ -53,9 +53,9 @@ public class UsedTradeController {
     }
 
     @PostMapping("/trade")
-    public ResponseEntity<?> trade(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long postId) {
+    public ResponseEntity<?> trade(@AuthenticationPrincipal UserDetails userDetails, @RequestParam Long postId, @RequestParam Long buyerId) {
         String email = userDetails.getUsername();
-        usedTradeStatusService.updateStatus(postId, email, TradeStatusType.COMPLETED);
+        usedTradeStatusService.updateStatus(postId, email, buyerId);
         return ResponseEntity.ok().build();
     }
     @DeleteMapping("/{postId}")

@@ -1,5 +1,6 @@
 package org.example.v1.comment.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.example.v1.comment.domain.Comment;
 import org.example.v1.comment.domain.CommunityComment;
@@ -9,6 +10,10 @@ import org.example.v1.comment.repository.CommentRepository;
 import org.example.v1.comment.repository.CommunityCommentRepository;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.notification.domain.Notification;
+import org.example.v1.notification.domain.NotificationType;
+import org.example.v1.notification.repository.NotificationRepository;
+import org.example.v1.notification.repository.NotificationTypeRepository;
 import org.example.v1.post.community.domain.Community;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.example.v1.post.generalForum.domain.GeneralForum;
@@ -22,11 +27,15 @@ public class CommunityCommentService {
     private final CommunityCommentRepository communityCommentRepository;
     private final MemberRepository memberRepository;
     private final CommunityRepository communityRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationTypeRepository notificationTypeRepository;
 
-    public CommunityCommentService(CommunityCommentRepository communityCommentRepository, MemberRepository memberRepository, CommunityRepository communityRepository) {
+    public CommunityCommentService(CommunityCommentRepository communityCommentRepository, MemberRepository memberRepository, CommunityRepository communityRepository, NotificationRepository notificationRepository, NotificationTypeRepository notificationTypeRepository) {
         this.communityCommentRepository = communityCommentRepository;
         this.memberRepository = memberRepository;
         this.communityRepository = communityRepository;
+        this.notificationRepository = notificationRepository;
+        this.notificationTypeRepository = notificationTypeRepository;
     }
 
     public CommentResponseDto createComment(String email, Long postId, CommentRequestDto commentRequestDto) {
@@ -50,6 +59,16 @@ public class CommunityCommentService {
                 comment.getCommunity().getId(),
                 comment.getWriter().getId()
         );
+        NotificationType byId = notificationTypeRepository.findById(5L)
+                .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
+
+        Notification notification = Notification.builder()
+                .notificationType(byId)
+                .content(comment.getWriter().getNickname()+"님이 [" + commu.getTitle() + "] 모집글에 댓글을 남겼습니다.")
+                .navigateId(commu.getId())
+                .member(commu.getWriter())
+                .build();
+        notificationRepository.save(notification);
         return commentResponseDto;
     }
 

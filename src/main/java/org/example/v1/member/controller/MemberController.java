@@ -156,4 +156,5 @@ public class MemberController {
         memberService.deleteMember(email);
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
+
 }
