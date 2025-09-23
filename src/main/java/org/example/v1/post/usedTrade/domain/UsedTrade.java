@@ -3,6 +3,7 @@ package org.example.v1.post.usedTrade.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.v1.member.domain.Member;
 import org.example.v1.post.domain.Post;
 import org.example.v1.post.image.domain.PostImage;
@@ -19,16 +20,18 @@ public class UsedTrade extends Post {
     @Column(length = 500)
     private String content;
     private Integer price;
+    private String isbn;
     private Integer viewCount;
 
     @Enumerated(EnumType.STRING)
     private TradeMethod tradeMethod;
 
     public UsedTrade(String title, Member writer, LocalDateTime createdAt,
-                     String content, Integer price, Integer viewCount, TradeMethod tradeMethod) {
+                     String content, Integer price, String isbn, Integer viewCount, TradeMethod tradeMethod) {
         super(title, writer, createdAt);
         this.content = content;
         this.price = price;
+        this.isbn = isbn;
         this.viewCount = viewCount;
         this.tradeMethod = tradeMethod;
     }
@@ -45,6 +48,7 @@ public class UsedTrade extends Post {
     public PostType getPostType() {
         return PostType.USED_TRADE;
     }
+
     public void increaseView(){
         this.viewCount++;
     }

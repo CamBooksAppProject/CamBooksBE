@@ -13,5 +13,6 @@ public class UsedTradeRequestDto {
     private String title;
     private String content;
     private int price;
+    private String isbn;
     private TradeMethod tradeMethod;
 }

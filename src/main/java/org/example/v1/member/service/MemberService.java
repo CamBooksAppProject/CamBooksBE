@@ -7,6 +7,10 @@ import org.example.v1.mailauth.MailService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.dto.*;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.notification.domain.Notification;
+import org.example.v1.notification.domain.NotificationType;
+import org.example.v1.notification.repository.NotificationRepository;
+import org.example.v1.notification.repository.NotificationTypeRepository;
 import org.example.v1.post.community.repository.CommunityJoinRepository;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.example.v1.post.generalForum.repository.GeneralForumRepository;
@@ -32,8 +36,10 @@ public class MemberService {
     private final CommunityJoinRepository communityJoinRepository;
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationTypeRepository notificationTypeRepository;
 
-    public MemberService(MemberRepository memberRepository, UniversityRepository universityRepository, MailService mailService, PasswordEncoder passwordEncoder, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, UsedTradeRepository usedTradeRepository, CommunityJoinRepository communityJoinRepository, CommentRepository commentRepository, PostLikeRepository postLikeRepository) {
+    public MemberService(MemberRepository memberRepository, UniversityRepository universityRepository, MailService mailService, PasswordEncoder passwordEncoder, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, UsedTradeRepository usedTradeRepository, CommunityJoinRepository communityJoinRepository, CommentRepository commentRepository, PostLikeRepository postLikeRepository, NotificationRepository notificationRepository, NotificationTypeRepository notificationTypeRepository) {
         this.memberRepository = memberRepository;
         this.universityRepository = universityRepository;
         this.mailService = mailService;
@@ -44,17 +50,19 @@ public class MemberService {
         this.communityJoinRepository = communityJoinRepository;
         this.commentRepository = commentRepository;
         this.postLikeRepository = postLikeRepository;
+        this.notificationRepository = notificationRepository;
+        this.notificationTypeRepository = notificationTypeRepository;
     }
 
     public Member create(MemberSaveReqDto dto) {
-        if (memberRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalStateException("이미 존재하는 이메일입니다.");
-        }
-
-        // 🔐 이메일 인증 여부 확인
-        if (!mailService.isVerified(dto.getEmail())) {
-            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
-        }
+//        if (memberRepository.findByEmail(dto.getEmail()).isPresent()) {
+//            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+//        }
+//
+//        // 🔐 이메일 인증 여부 확인
+//        if (!mailService.isVerified(dto.getEmail())) {
+//            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+//        }
 
         Member newMember = Member.builder()
                 .name(dto.getName())
@@ -67,8 +75,21 @@ public class MemberService {
                         () -> new IllegalArgumentException("해당 대학이 존재하지 않습니다.")
                 ))
                 .build();
+        memberRepository.save(newMember);
 
-        return memberRepository.save(newMember);
+
+        NotificationType byId = notificationTypeRepository.findById(1L)
+                .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
+
+        Notification notification = Notification.builder()
+                .notificationType(byId)
+                .content(newMember.getNickname()+"님, 회원가입을 축하합니다.")
+                .navigateId(null)
+                .member(newMember)
+                .build();
+        notificationRepository.save(notification);
+
+        return newMember;
     }
 
     public boolean checkId(String id) {

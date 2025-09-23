@@ -18,6 +18,7 @@ import org.example.v1.post.image.repository.PostImageRepository;
 import org.example.v1.post.usedTrade.domain.UsedTrade;
 import org.example.v1.post.usedTrade.dto.UsedTradePreviewDto;
 import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
+import org.example.v1.post.usedTrade.repository.UsedTradeStatusRepository;
 import org.example.v1.postLike.domain.PostLike;
 import org.example.v1.postLike.domain.PostType;
 import org.example.v1.postLike.repository.PostLikeRepository;
@@ -35,6 +36,7 @@ public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
     private final MemberRepository memberRepository;
     private final UsedTradeRepository usedTradeRepository;
+    private final UsedTradeStatusRepository usedTradeStatusRepository;
     private final GeneralForumRepository generalForumRepository;
     private final CommunityRepository communityRepository;
     private final PostImageRepository postImageRepository;
@@ -42,10 +44,11 @@ public class PostLikeService {
     private final CommentService commentService;
     private final CommunityCommentService communityCommentService;
 
-    public PostLikeService(PostLikeRepository postLikeRepository, MemberRepository memberRepository, UsedTradeRepository usedTradeRepository, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, PostImageRepository postImageRepository, CommunityImageRepository communityImageRepository, CommentService commentService, CommunityCommentService communityCommentService) {
+    public PostLikeService(PostLikeRepository postLikeRepository, MemberRepository memberRepository, UsedTradeRepository usedTradeRepository, UsedTradeStatusRepository usedTradeStatusRepository, GeneralForumRepository generalForumRepository, CommunityRepository communityRepository, PostImageRepository postImageRepository, CommunityImageRepository communityImageRepository, CommentService commentService, CommunityCommentService communityCommentService) {
         this.postLikeRepository = postLikeRepository;
         this.memberRepository = memberRepository;
         this.usedTradeRepository = usedTradeRepository;
+        this.usedTradeStatusRepository = usedTradeStatusRepository;
         this.generalForumRepository = generalForumRepository;
         this.communityRepository = communityRepository;
         this.postImageRepository = postImageRepository;
@@ -137,7 +140,9 @@ public class PostLikeService {
                 postImageRepository.findByUsedTrade(usedTrade).stream()
                         .findFirst()
                         .map(PostImage::getImageUrl)
-                        .orElse(null)
+                        .orElse(null),
+                usedTradeStatusRepository.findByUsedTrade(usedTrade).getStatus()
+
         );
     }
     private CommunityPreviewDto toCommunityPreviewDto(Community community) {

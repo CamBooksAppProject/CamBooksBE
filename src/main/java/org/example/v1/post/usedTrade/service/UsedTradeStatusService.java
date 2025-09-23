@@ -1,7 +1,12 @@
 package org.example.v1.post.usedTrade.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.notification.domain.Notification;
+import org.example.v1.notification.domain.NotificationType;
+import org.example.v1.notification.repository.NotificationRepository;
+import org.example.v1.notification.repository.NotificationTypeRepository;
 import org.example.v1.post.image.domain.PostImage;
 import org.example.v1.post.image.repository.PostImageRepository;
 import org.example.v1.post.usedTrade.domain.TradeStatusType;
@@ -12,6 +17,7 @@ import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
 import org.example.v1.post.usedTrade.repository.UsedTradeStatusRepository;
 import org.example.v1.postLike.repository.PostLikeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,30 +28,52 @@ public class UsedTradeStatusService {
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostImageRepository postImageRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationTypeRepository notificationTypeRepository;
 
-    public UsedTradeStatusService(UsedTradeStatusRepository usedTradeStatusRepository, UsedTradeRepository usedTradeRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository, PostImageRepository postImageRepository) {
+    public UsedTradeStatusService(UsedTradeStatusRepository usedTradeStatusRepository, UsedTradeRepository usedTradeRepository, MemberRepository memberRepository, PostLikeRepository postLikeRepository, PostImageRepository postImageRepository, NotificationRepository notificationRepository, NotificationTypeRepository notificationTypeRepository) {
         this.usedTradeStatusRepository = usedTradeStatusRepository;
         this.usedTradeRepository = usedTradeRepository;
         this.memberRepository = memberRepository;
         this.postLikeRepository = postLikeRepository;
         this.postImageRepository = postImageRepository;
+        this.notificationRepository = notificationRepository;
+        this.notificationTypeRepository = notificationTypeRepository;
     }
 
-    public void updateStatus(Long postId, String email, TradeStatusType tradeStatusType) {
+    @Transactional
+    public void updateStatus(Long postId, String email, Long buyerId) {
         UsedTrade post = usedTradeRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않음"));
+        Member seller = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않음 =. email : " + email));
+        Member buyer = memberRepository.findById(buyerId)
+                .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않음 => id : " + buyerId));
+        UsedTradeStatus status = usedTradeStatusRepository.findByUsedTrade(post);
 
-        UsedTradeStatus usedTradeStatus = usedTradeStatusRepository.findByUsedTrade(post);
+        status.updateBuyer(buyer);
+        status.setStatus(TradeStatusType.COMPLETED);
 
-        if (usedTradeStatus == null) {
-            usedTradeStatus = new UsedTradeStatus(post, tradeStatusType);
-        }
+        usedTradeStatusRepository.save(status);
 
-        usedTradeStatus.setBuyer(member);
-        usedTradeStatus.setStatus(tradeStatusType);
-        usedTradeStatusRepository.save(usedTradeStatus);
+        NotificationType byId = notificationTypeRepository.findById(4L)
+                .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
+
+        Notification notificationForBuyer = Notification.builder()
+                .notificationType(byId)
+                .content("["+ post.getTitle()+"]" + " 구매가 완료되었습니다.")
+                .navigateId(post.getId())
+                .member(buyer)
+                .build();
+        Notification notificationForSeller = Notification.builder()
+                .notificationType(byId)
+                .content("["+ post.getTitle()+"]" + " 판매가 완료되었습니다.")
+                .navigateId(post.getId())
+                .member(seller)
+                .build();
+        notificationRepository.save(notificationForBuyer);
+        notificationRepository.save(notificationForSeller);
+
     }
     public List<UsedTradePreviewDto> findTradePreviewsByBuyerEmail(String email) {
         Member buyer = memberRepository.findByEmail(email)
@@ -66,7 +94,8 @@ public class UsedTradeStatusService {
                             postImageRepository.findByUsedTrade(trade).stream()
                                     .findFirst()
                                     .map(PostImage::getImageUrl)
-                                    .orElse(null)
+                                    .orElse(null),
+                            status.getStatus()
                     );
                 })
                 .toList();

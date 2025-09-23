@@ -19,8 +19,8 @@ public class UsedTradeStatus {
     @OneToOne
     private UsedTrade usedTrade;
 
-    @ManyToOne
-    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id")
     private Member buyer;
 
     @Setter
@@ -31,5 +31,9 @@ public class UsedTradeStatus {
     public UsedTradeStatus(UsedTrade usedTrade, TradeStatusType status) {
         this.usedTrade = usedTrade;
         this.status = status;
+    }
+
+    public void updateBuyer(Member buyer) {
+        this.buyer = buyer;
     }
 }

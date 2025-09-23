@@ -3,6 +3,8 @@ package org.example.v1.post.usedTrade.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.v1.post.usedTrade.domain.TradeStatusType;
+import org.example.v1.post.usedTrade.domain.UsedTradeStatus;
 
 import java.util.List;
 
@@ -22,8 +24,9 @@ public class UsedTradeResponseDto {
     private long postLikeCount;
     private List<String> imageUrls;
     private Long userId;
+    private TradeStatusType status;
 
-    public UsedTradeResponseDto(Long id, String title, String content, int price, String tradeMethod, int viewCount, String writerName, String university, String postType, long postLikeCount, Long userId) {
+    public UsedTradeResponseDto(Long id, String title, String content, int price, String tradeMethod, int viewCount, String writerName, String university, String postType, long postLikeCount, Long userId , TradeStatusType status) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -35,5 +38,6 @@ public class UsedTradeResponseDto {
         this.postType = postType;
         this.postLikeCount = postLikeCount;
         this.userId = userId;
+        this.status = status;
     }
 }
