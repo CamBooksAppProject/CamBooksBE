@@ -91,7 +91,8 @@ public class UsedTradeService {
                 saved.getClass().toString(),
                 postLikeRepository.countByPost(post),
                 saved.getWriter().getId(),
-                status.getStatus()
+                status.getStatus(),
+                saved.getIsbn()
         );
     }
 
@@ -120,7 +121,8 @@ public class UsedTradeService {
                 postLikeRepository.countByPost(post),
                 imageUrls,
                 post.getWriter().getId(),
-                status.getStatus()
+                status.getStatus(),
+                post.getIsbn()
         );
     }
 
@@ -132,29 +134,31 @@ public class UsedTradeService {
     public UsedTradeResponseDto update(Long postId, Long memberId, UsedTradeRequestDto dto) {
         UsedTrade post = usedTradeRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+        UsedTradeStatus usedTradeStatus = usedTradeStatusRepository.findByUsedTrade(post);
 
         if (!post.getWriter().getId().equals(memberId)) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
-
+        usedTradeStatus.setStatus(dto.getStatus());
         post.updateFields(dto.getTitle(), dto.getContent(), dto.getPrice(), dto.getTradeMethod());
 
-        UsedTrade updated = usedTradeRepository.save(post);
-        TradeStatusType status = usedTradeStatusRepository.findByUsedTrade(post).getStatus();
+        UsedTradeStatus savedStatus = usedTradeStatusRepository.save(usedTradeStatus);
+        UsedTrade saved = usedTradeRepository.save(post);
 
         return new UsedTradeResponseDto(
-                updated.getId(),
-                updated.getTitle(),
-                updated.getContent(),
-                updated.getPrice(),
-                updated.getTradeMethod().toString(),
-                updated.getViewCount(),
-                updated.getWriter().getName(),
-                updated.getWriter().getUniversity().getNameKo(),
-                updated.getClass().getSimpleName(),
-                postLikeRepository.countByPost(updated),
-                updated.getWriter().getId(),
-                status
+                saved.getId(),
+                saved.getTitle(),
+                saved.getContent(),
+                saved.getPrice(),
+                saved.getTradeMethod().toString(),
+                saved.getViewCount(),
+                saved.getWriter().getName(),
+                saved.getWriter().getUniversity().getNameKo(),
+                saved.getClass().getSimpleName(),
+                postLikeRepository.countByPost(saved),
+                saved.getWriter().getId(),
+                savedStatus.getStatus(),
+                saved.getIsbn()
         );
     }
 

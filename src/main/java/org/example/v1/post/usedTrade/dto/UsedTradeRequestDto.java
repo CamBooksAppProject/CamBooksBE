@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.v1.post.usedTrade.domain.TradeMethod;
+import org.example.v1.post.usedTrade.domain.TradeStatusType;
+import org.example.v1.post.usedTrade.domain.UsedTradeStatus;
 
 
 @Data
@@ -14,5 +16,6 @@ public class UsedTradeRequestDto {
     private String content;
     private int price;
     private String isbn;
+    private TradeStatusType status;
     private TradeMethod tradeMethod;
 }
