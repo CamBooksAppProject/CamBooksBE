@@ -38,6 +38,24 @@ public class ChatService {
         this.readStatusRepository = readStatusRepository;
         this.memberRepository = memberRepository;
     }
+    public void beforeSaveMessage(Long roomId, ChatMessageDto chatMessageDto) {
+        //        채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(()-> new EntityNotFoundException("Room not found"));
+//        보낸 사람 조회
+        Member sender = memberRepository.findByEmail(chatMessageDto.getSenderEmail())
+                .orElseThrow(()-> new EntityNotFoundException("Member not found"));
+
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        for(ChatParticipant c: chatParticipants) {
+            if (c.isLeft()) {
+                c.setIsLeft(false);
+                System.out.println("-----텟트ㅡ");
+                chatParticipantRepository.save(c);
+            }
+        }
+        this.saveMessage(roomId, chatMessageDto);
+    }
 
     public void saveMessage(Long roomId, ChatMessageDto chatMessageDto) {
 //        채팅방 조회
@@ -46,7 +64,8 @@ public class ChatService {
 //        보낸 사람 조회
         Member sender = memberRepository.findByEmail(chatMessageDto.getSenderEmail())
                 .orElseThrow(()-> new EntityNotFoundException("Member not found"));
-//        메세지 저장
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        //        메세지 저장
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .member(sender)
@@ -54,8 +73,7 @@ public class ChatService {
                 .build();
         chatMessageRepository.save(chatMessage);
 //        사용자별로 읽음 여부 저장
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
-        for(ChatParticipant c: chatParticipants){
+        for(ChatParticipant c: chatParticipants) {
             ReadStatus readStatus = ReadStatus.builder()
                     .chatRoom(chatRoom)
                     .member(c.getMember())
@@ -184,43 +202,56 @@ public class ChatService {
             r.updateIsRead(true);
         }
     }
-    public List<MyChatListResponseDto> getMyChatRooms(){
+    public List<MyChatListResponseDto> getMyChatRooms() {
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(()-> new EntityNotFoundException("Member not found"));
-//        List<ChatParticipant> chatParticipants = chatParticipantRepository.findAllByMember(member);
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findAllByMember(member);
         List<MyChatListResponseDto> dtos = new ArrayList<>();
-        for(ChatParticipant c: chatParticipants){
-            Long count = readStatusRepository.countByChatRoomAndMemberAndIsReadFalse(c.getChatRoom(),member);
-            if(c.getChatRoom().getIsGroupChat().equals("N")){
-                // 참가자 중 내가 아닌 상대방을 찾기
+
+        for (ChatParticipant c : chatParticipants) {
+            // 내가 나간 방인데, 읽지 않은 메시지가 없으면 → continue (리스트에 포함 X)
+            if (c.isLeft()) {
+                Long unreadCount = readStatusRepository.countByChatRoomAndMemberAndIsReadFalse(c.getChatRoom(), member);
+                if (unreadCount == 0) {
+                    continue; // 이 방은 내 목록에서 제외
+                }
+            }
+
+            Long count = readStatusRepository.countByChatRoomAndMemberAndIsReadFalse(c.getChatRoom(), member);
+
+            if (c.getChatRoom().getIsGroupChat().equals("N")) {
+                // 1:1 방 → 상대방 찾기
                 Member otherMember = c.getChatRoom().getChatParticipants().stream()
                         .map(ChatParticipant::getMember)
-                        .filter(m -> !m.equals(member))  // 나 자신 제외
+                        .filter(m -> !m.equals(member))
                         .findFirst()
-                        .orElse(null);  // 항상 2명이라면 null은 발생 안 함
+                        .orElse(null);
 
                 MyChatListResponseDto dto = MyChatListResponseDto.builder()
                         .roomId(c.getChatRoom().getId())
-                        .roomName(otherMember != null ? otherMember.getNickname() : "Unknown") // 예: 상대방 이름
+                        .roomName(otherMember != null ? otherMember.getNickname() : "Unknown")
                         .isGroupChat(c.getChatRoom().getIsGroupChat())
                         .unReadCount(count)
                         .build();
 
                 dtos.add(dto);
 
-            }else{
-            MyChatListResponseDto dto = MyChatListResponseDto.builder()
-                    .roomId(c.getChatRoom().getId())
-                    .roomName(c.getChatRoom().getName())
-                    .isGroupChat(c.getChatRoom().getIsGroupChat())
-                    .unReadCount(count)
-                    .build();
-            dtos.add(dto);
+            } else {
+                // 그룹채팅
+                MyChatListResponseDto dto = MyChatListResponseDto.builder()
+                        .roomId(c.getChatRoom().getId())
+                        .roomName(c.getChatRoom().getName())
+                        .isGroupChat(c.getChatRoom().getIsGroupChat())
+                        .unReadCount(count)
+                        .build();
+
+                dtos.add(dto);
             }
         }
         return dtos;
     }
+
 
     public void leaveGroupChatRoom(Long roomId){
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
