@@ -15,4 +15,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             ChatRoom chatRoom,
             LocalDateTime updatedTime
     );
+    ChatMessage findTopByChatRoomOrderByCreatedTimeDesc(ChatRoom chatRoom);
 }
