@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -106,6 +107,21 @@ public class MemberController {
         String email = userDetails.getUsername();
         memberService.getMember(email);
         return new ResponseEntity<>(memberService.getMember(email), HttpStatus.OK);
+    }
+
+    @PostMapping("/profile-image")
+    public ResponseEntity<?> uploadProfileImage(@AuthenticationPrincipal UserDetails userDetails,
+                                                @RequestParam("file") MultipartFile file) {
+        String email = userDetails.getUsername();
+        String url = memberService.updateProfileImage(email, file);
+        return ResponseEntity.ok(url);
+    }
+
+    @DeleteMapping("/profile-image")
+    public ResponseEntity<?> deleteProfileImage(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        memberService.deleteProfileImage(email);
+        return ResponseEntity.ok("프로필 이미지가 삭제되었습니다.");
     }
 
     @GetMapping("/nickname")

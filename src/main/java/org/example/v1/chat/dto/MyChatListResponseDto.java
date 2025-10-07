@@ -18,4 +18,5 @@ public class MyChatListResponseDto {
     private Long unReadCount;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
+    private String profileImage;
 }

@@ -19,6 +19,14 @@ import org.example.v1.postLike.repository.PostLikeRepository;
 import org.example.v1.university.repository.UniversityRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.UUID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,6 +148,7 @@ public class MemberService {
         memberResponseDto.setEmail(member.getEmail());
         memberResponseDto.setAddress(member.getAddress());
         memberResponseDto.setUniversity(member.getUniversity().getNameKo());
+        memberResponseDto.setProfileImage(member.getProfileImage());
         return memberResponseDto;
     }
 
@@ -229,5 +238,41 @@ public class MemberService {
         communityRepository.deleteAllByWriter(member);
         usedTradeRepository.deleteAllByWriter(member);
         memberRepository.delete(member);
+    }
+
+    public String updateProfileImage(String email, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어있습니다.");
+        }
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+        try {
+            String ext = Optional.ofNullable(file.getOriginalFilename())
+                    .filter(n -> n.contains("."))
+                    .map(n -> n.substring(n.lastIndexOf('.')))
+                    .orElse("");
+            String filename = UUID.randomUUID() + ext;
+            // 절대 경로로 저장 (프로젝트 루트/upload/profile)
+            Path dir = Paths.get(System.getProperty("user.dir"), "upload", "profile");
+            Files.createDirectories(dir);
+            Path savePath = dir.resolve(filename);
+            // tmp 디렉토리 이슈 방지를 위해 NIO 복사 사용
+            try (java.io.InputStream in = file.getInputStream()) {
+                Files.copy(in, savePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+            String urlPath = "/upload/profile/" + filename;
+            member.setProfileImage(urlPath);
+            memberRepository.save(member); // 명시적으로 저장하여 DB 반영 보장
+            return urlPath;
+        } catch (IOException e) {
+            throw new RuntimeException("프로필 이미지 저장 실패", e);
+        }
+    }
+
+    public void deleteProfileImage(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+        member.setProfileImage(null);
+        memberRepository.save(member);
     }
 }
