@@ -33,6 +33,7 @@ public class Member {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private University university;
+    @Setter
     private String profileImage;
 
     public void updatePassword(String encodedPassword) {
@@ -42,9 +43,13 @@ public class Member {
         this.password = encodedPassword;
     }
     public void updateAddress(String address) {
-        if (address == null || address.length() < 10) {
-            throw new IllegalArgumentException("<UNK> <UNK> <UNK>.");
+        if (address == null || address.length() < 5) {
+            throw new IllegalArgumentException("주소는 5자 이상 입력해주세요.");
         }
         this.address = address;
+    }
+
+    public void setProfileImage(String urlPath) {
+        this.profileImage = urlPath;
     }
 }

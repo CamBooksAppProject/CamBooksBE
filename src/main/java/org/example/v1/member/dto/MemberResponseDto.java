@@ -13,4 +13,5 @@ public class MemberResponseDto {
     private String email;
     private String university;
     private String address;
+    private String profileImage;
 }

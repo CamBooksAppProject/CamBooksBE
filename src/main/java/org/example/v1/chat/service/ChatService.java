@@ -82,6 +82,8 @@ public class ChatService {
                     .build();
             readStatusRepository.save(readStatus);
         }
+        // 저장된 시간 DTO에 세팅하여 브로드캐스트 시 함께 전달
+        chatMessageDto.setCreatedTime(chatMessage.getCreatedTime());
     }
 
     public void createGroupRoom(String chatRoomName){
@@ -165,6 +167,7 @@ public class ChatService {
             ChatMessageDto chatMessageDto = ChatMessageDto.builder()
                     .message(m.getContent())
                     .senderEmail(m.getMember().getEmail())
+                    .createdTime(m.getCreatedTime())
                     .build();
             dtos.add(chatMessageDto);
         }
@@ -239,6 +242,7 @@ public class ChatService {
                         .unReadCount(count)
                         .lastMessage(lastMessageContent)
                         .lastMessageTime(lastMessage != null ? lastMessage.getCreatedTime() : null)
+                        .profileImage(otherMember != null ? otherMember.getProfileImage() : null)
                         .build();
 
                 dtos.add(dto);
