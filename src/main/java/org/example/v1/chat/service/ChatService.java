@@ -220,6 +220,10 @@ public class ChatService {
 
             Long count = readStatusRepository.countByChatRoomAndMemberAndIsReadFalse(c.getChatRoom(), member);
 
+            // 마지막 메시지 조회
+            ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderByCreatedTimeDesc(c.getChatRoom());
+            String lastMessageContent = (lastMessage != null) ? lastMessage.getContent() : "";
+
             if (c.getChatRoom().getIsGroupChat().equals("N")) {
                 // 1:1 방 → 상대방 찾기
                 Member otherMember = c.getChatRoom().getChatParticipants().stream()
@@ -233,6 +237,8 @@ public class ChatService {
                         .roomName(otherMember != null ? otherMember.getNickname() : "Unknown")
                         .isGroupChat(c.getChatRoom().getIsGroupChat())
                         .unReadCount(count)
+                        .lastMessage(lastMessageContent)
+                        .lastMessageTime(lastMessage != null ? lastMessage.getCreatedTime() : null)
                         .build();
 
                 dtos.add(dto);
@@ -244,11 +250,22 @@ public class ChatService {
                         .roomName(c.getChatRoom().getName())
                         .isGroupChat(c.getChatRoom().getIsGroupChat())
                         .unReadCount(count)
+                        .lastMessage(lastMessageContent)
+                        .lastMessageTime(lastMessage != null ? lastMessage.getCreatedTime() : null)
                         .build();
 
                 dtos.add(dto);
             }
         }
+        
+        // 최신 메시지 시간 순으로 정렬 (최근 메시지가 먼저)
+        dtos.sort((dto1, dto2) -> {
+            if (dto1.getLastMessageTime() == null && dto2.getLastMessageTime() == null) return 0;
+            if (dto1.getLastMessageTime() == null) return 1;
+            if (dto2.getLastMessageTime() == null) return -1;
+            return dto2.getLastMessageTime().compareTo(dto1.getLastMessageTime());
+        });
+        
         return dtos;
     }
 
