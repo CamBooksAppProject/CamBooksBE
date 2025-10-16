@@ -46,6 +46,10 @@ public class Community extends Post {
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommunityImage> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommunityJoin> joins = new ArrayList<>();
+
+
     @Override
     public PostType getPostType() {
         return PostType.COMMUNITY;

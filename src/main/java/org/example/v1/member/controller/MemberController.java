@@ -50,6 +50,7 @@ public class MemberController {
         String jwtToken = jwtTokenProvider.createtoken(member.getEmail(), member.getUniversity().toString());
         Map<String, Object> loginInfo = new HashMap<>();
         loginInfo.put("id", member.getId());
+        loginInfo.put("univId", member.getUniversity().getId());
         loginInfo.put("token", jwtToken);
         return new ResponseEntity<>(loginInfo, HttpStatus.OK);
     }
