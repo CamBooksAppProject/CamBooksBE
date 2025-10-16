@@ -223,4 +223,9 @@ public class UsedTradeService {
         usedTradeStatusRepository.deleteAllByUsedTrade(usedTrade);
         usedTradeRepository.delete(usedTrade);
     }
+
+    public List<UsedTradePreviewDto> getByUniversity(Long universityId) {
+        List<UsedTrade> posts = usedTradeRepository.findByWriter_University_Id(universityId);
+        return getUsedTradePreviewDto(posts);
+    }
 }

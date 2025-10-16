@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface UsedTradeRepository extends PostRepository<UsedTrade> {
     List<UsedTrade> findByTitleContaining(String keyword);
+    List<UsedTrade> findByWriter_University_Id(Long universityId);
     void deleteAllByWriter(Member writer);
 }

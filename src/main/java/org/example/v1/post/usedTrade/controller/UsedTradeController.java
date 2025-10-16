@@ -37,8 +37,11 @@ public class UsedTradeController {
         return ResponseEntity.ok(usedTradeResponseDto);
     }
     @GetMapping
-    public ResponseEntity<List<UsedTradePreviewDto>> getAll() {
-        return ResponseEntity.ok(usedTradeService.getAll());
+    public ResponseEntity<List<UsedTradePreviewDto>> getAll(@RequestParam(required = false) Long universityId) {
+        if(universityId == null){
+            return ResponseEntity.ok(usedTradeService.getAll());
+        }else
+            return ResponseEntity.ok(usedTradeService.getByUniversity(universityId));
     }
 
     @GetMapping("/{postId}")
