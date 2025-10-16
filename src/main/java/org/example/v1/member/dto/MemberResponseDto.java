@@ -12,6 +12,7 @@ public class MemberResponseDto {
     private String name;
     private String email;
     private String university;
+    private Long univId;
     private String address;
     private String profileImage;
 }

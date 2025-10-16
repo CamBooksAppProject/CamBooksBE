@@ -62,6 +62,7 @@ public class MemberService {
         this.notificationTypeRepository = notificationTypeRepository;
     }
 
+    @Transactional
     public Member create(MemberSaveReqDto dto) {
 //        if (memberRepository.findByEmail(dto.getEmail()).isPresent()) {
 //            throw new IllegalStateException("이미 존재하는 이메일입니다.");
@@ -148,6 +149,7 @@ public class MemberService {
         memberResponseDto.setEmail(member.getEmail());
         memberResponseDto.setAddress(member.getAddress());
         memberResponseDto.setUniversity(member.getUniversity().getNameKo());
+        memberResponseDto.setUnivId(member.getUniversity().getId());
         memberResponseDto.setProfileImage(member.getProfileImage());
         return memberResponseDto;
     }
