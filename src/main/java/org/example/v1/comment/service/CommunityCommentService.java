@@ -59,16 +59,18 @@ public class CommunityCommentService {
                 comment.getCommunity().getId(),
                 comment.getWriter().getId()
         );
-        NotificationType byId = notificationTypeRepository.findById(5L)
-                .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
+        if(!commu.getWriter().equals(member)) {
+            NotificationType byId = notificationTypeRepository.findById(5L)
+                    .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
 
-        Notification notification = Notification.builder()
-                .notificationType(byId)
-                .content(comment.getWriter().getNickname()+"님이 [" + commu.getTitle() + "] 모집글에 댓글을 남겼습니다.")
-                .navigateId(commu.getId())
-                .member(commu.getWriter())
-                .build();
-        notificationRepository.save(notification);
+            Notification notification = Notification.builder()
+                    .notificationType(byId)
+                    .content(comment.getWriter().getNickname()+"님이 [" + commu.getTitle() + "] 모집글에 댓글을 남겼습니다.")
+                    .navigateId(commu.getId())
+                    .member(commu.getWriter())
+                    .build();
+            notificationRepository.save(notification);
+        }
         return commentResponseDto;
     }
 

@@ -58,16 +58,18 @@ public class CommentService {
                 comment.getGeneralForum().getId(),
                 comment.getWriter().getId()
         );
-        NotificationType byId = notificationTypeRepository.findById(6L)
-                .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
 
-        Notification notification = Notification.builder()
-                .notificationType(byId)
-                .content(comment.getWriter().getNickname()+"님이 [" + generalForum.getTitle() + "] 게시글에 댓글을 남겼습니다.")
-                .navigateId(generalForum.getId())
-                .member(generalForum.getWriter())
-                .build();
-        notificationRepository.save(notification);
+        if(!comment.getWriter().equals(postWriter)) {
+            NotificationType byId = notificationTypeRepository.findById(6L)
+                    .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
+            Notification notification = Notification.builder()
+                    .notificationType(byId)
+                    .content(comment.getWriter().getNickname()+"님이 [" + generalForum.getTitle() + "] 게시글에 댓글을 남겼습니다.")
+                    .navigateId(generalForum.getId())
+                    .member(generalForum.getWriter())
+                    .build();
+            notificationRepository.save(notification);
+        }
         return commentResponseDto;
     }
 
