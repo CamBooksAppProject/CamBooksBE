@@ -1,6 +1,14 @@
 package org.example.v1.post.community.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.example.v1.chat.domain.ChatParticipant;
+import org.example.v1.chat.domain.ChatRoom;
+import org.example.v1.chat.domain.GroupChatRoomOwner;
+import org.example.v1.chat.repository.ChatParticipantRepository;
+import org.example.v1.chat.repository.ChatRoomRepository;
+import org.example.v1.chat.repository.GroupChatRoomOwnerRepository;
+import org.example.v1.chat.service.ChatService;
 import org.example.v1.comment.repository.CommunityCommentRepository;
 import org.example.v1.comment.service.CommunityCommentService;
 import org.example.v1.member.domain.Member;
@@ -14,6 +22,7 @@ import org.example.v1.post.image.domain.CommunityImage;
 import org.example.v1.post.image.repository.CommunityImageRepository;
 import org.example.v1.postLike.repository.PostLikeRepository;
 import org.example.v1.searchResult.dto.SearchResultDto;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,14 +43,22 @@ public class CommunityService {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityCommentService communityCommentService;
     private final PostLikeRepository postLikeRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
+    private final GroupChatRoomOwnerRepository groupChatRoomOwnerRepository;
+    private final ChatService chatService;
 
-    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentRepository communityCommentRepository, CommunityCommentService communityCommentService, PostLikeRepository postLikeRepository) {
+    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentRepository communityCommentRepository, CommunityCommentService communityCommentService, PostLikeRepository postLikeRepository, ChatService chatService, ChatRoomRepository chatRoomRepository, ChatParticipantRepository chatParticipantRepository, GroupChatRoomOwnerRepository groupChatRoomOwnerRepository, ChatService chatService1) {
         this.communityRepository = communityRepository;
         this.memberRepository = memberRepository;
         this.communityImageRepository = communityImageRepository;
         this.communityCommentRepository = communityCommentRepository;
         this.communityCommentService = communityCommentService;
         this.postLikeRepository = postLikeRepository;
+        this.chatRoomRepository = chatRoomRepository;
+        this.chatParticipantRepository = chatParticipantRepository;
+        this.groupChatRoomOwnerRepository = groupChatRoomOwnerRepository;
+        this.chatService = chatService1;
     }
     public CommunityResponseDto create(String email, CommunityRequestDto dto, List<MultipartFile> images) {
         Member writer = memberRepository.findByEmail(email)
@@ -73,6 +91,25 @@ public class CommunityService {
                 }
             }
         }
+//        채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(dto.getTitle())
+                .isGroupChat("Y")
+                .build();
+        chatRoomRepository.save(chatRoom);
+//        채팅 참여자로 개설자를 추가
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(writer)
+                .build();
+        GroupChatRoomOwner owner = GroupChatRoomOwner.builder()
+                .chatRoom(chatRoom)
+                .community(post)
+                .owner(writer)
+                .build();
+        chatParticipantRepository.save(chatParticipant);
+        groupChatRoomOwnerRepository.save(owner);
+
 
         return new CommunityResponseDto(
                 saved.getId(),
@@ -85,7 +122,8 @@ public class CommunityService {
                 saved.getCreatedAt(),
                 saved.getStartDateTime(),
                 saved.getEndDateTime(),
-                saved.getWriter().getId()
+                saved.getWriter().getId(),
+                chatRoom.getId()
         );
     }
 
@@ -100,6 +138,8 @@ public class CommunityService {
         List<String> imageUrls = images.stream()
                 .map(CommunityImage::getImageUrl)
                 .toList();
+        GroupChatRoomOwner owner = groupChatRoomOwnerRepository.findByCommunity(post)
+                .orElseThrow(() -> new IllegalArgumentException("<UNK> <UNK> <UNK>"));
         return new CommunityResponseDto(
                 post.getId(),
                 post.getTitle(),
@@ -114,7 +154,8 @@ public class CommunityService {
                 imageUrls,
                 communityCommentService.getCommentList(post.getId()),
                 communityCommentService.countComment(post.getId()),
-                post.getWriter().getId()
+                post.getWriter().getId(),
+                1L
         );
     }
     public List<CommunityPreviewDto> findAll() {
@@ -169,7 +210,12 @@ public class CommunityService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
         Community community = communityRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글 없음"));
+        Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByOwner(community.getWriter());
+        ChatRoom chatRoom = byOwner.map(GroupChatRoomOwner::getChatRoom).orElse(null);
         if(community.getWriter().getId().equals(member.getId())){
+            if(chatRoom != null) {
+                chatService.leaveCommunityChatRoom(chatRoom.getId(), email);
+            }
             communityCommentRepository.deleteAllByCommunity(community);
             postLikeRepository.deleteAllByPost(community);
             communityRepository.delete(community);

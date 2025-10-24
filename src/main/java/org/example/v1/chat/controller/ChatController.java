@@ -20,25 +20,25 @@ public class ChatController {
     }
 
 //    그룹채팅방 개설
-//    @PostMapping("/room/group/create")
-//    public ResponseEntity<?> createGroupRoom(@RequestParam String roomName){
-//        chatService.createGroupRoom(roomName);
-//        return ResponseEntity.ok().build();
-//    }
+    @PostMapping("/room/group/create")
+    public ResponseEntity<?> createGroupRoom(@RequestParam String roomName){
+        chatService.createGroupRoom(roomName);
+        return ResponseEntity.ok().build();
+    }
 
 //    그룹채팅목록조회
-//    @GetMapping("/room/group/list")
-//    public ResponseEntity<?> getGroupChatRooms(){
-//        List<ChatRoomListResponseDto> chatRooms = chatService.getGroupChatRooms();
-//        return new ResponseEntity<>(chatRooms, HttpStatus.OK);
-//    }
+    @GetMapping("/room/group/list")
+    public ResponseEntity<?> getGroupChatRooms(){
+        List<ChatRoomListResponseDto> chatRooms = chatService.getGroupChatRooms();
+        return new ResponseEntity<>(chatRooms, HttpStatus.OK);
+    }
 
 //    그룹채팅방 참여
-//    @PostMapping("/room/group/{roomId}/join")
-//    public ResponseEntity<?> joinGroupChatRoom(@PathVariable Long roomId){
-//        chatService.addParticipantToGroupChat(roomId);
-//        return ResponseEntity.ok().build();
-//    }
+    @PostMapping("/room/group/{roomId}/join")
+    public ResponseEntity<?> joinGroupChatRoom(@PathVariable Long roomId){
+        chatService.addParticipantToGroupChat(roomId);
+        return ResponseEntity.ok().build();
+    }
 
     ////    1대1 채팅방 개설 또는 기존 채팅방 roomId return
     @PostMapping("/room/private/create")
@@ -68,11 +68,17 @@ public class ChatController {
         return new ResponseEntity<>(myChatListResponseDtos, HttpStatus.OK);
     }
 
-    ////    채팅방 떠나기(양측 모두 떠나면 채팅방 삭제~~)
+    ////   1대1 채팅방 떠나기(양측 모두 떠나면 채팅방 삭제)
     @DeleteMapping("/room/{roomId}/leave")
+    public ResponseEntity<?> leaveChatRoom(@PathVariable Long roomId){
+        chatService.leaveChatRoom(roomId);
+        return ResponseEntity.ok().build();
+    }
+
+    ////    그룹(커뮤니티) 채팅방 떠나기(모든 멤버 떠나면 or 방장 떠나면 방 삭제)
+    @DeleteMapping("/room/group/{roomId}/leave")
     public ResponseEntity<?> leaveGroupChatRoom(@PathVariable Long roomId){
         chatService.leaveGroupChatRoom(roomId);
         return ResponseEntity.ok().build();
     }
-
 }

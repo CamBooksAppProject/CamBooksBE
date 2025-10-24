@@ -1,19 +1,21 @@
 package org.example.v1.chat.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.example.v1.chat.domain.ChatMessage;
-import org.example.v1.chat.domain.ChatParticipant;
-import org.example.v1.chat.domain.ChatRoom;
-import org.example.v1.chat.domain.ReadStatus;
+import org.example.v1.chat.domain.*;
 import org.example.v1.chat.dto.ChatMessageDto;
 import org.example.v1.chat.dto.ChatRoomListResponseDto;
 import org.example.v1.chat.dto.MyChatListResponseDto;
-import org.example.v1.chat.repository.ChatMessageRepository;
-import org.example.v1.chat.repository.ChatParticipantRepository;
-import org.example.v1.chat.repository.ChatRoomRepository;
-import org.example.v1.chat.repository.ReadStatusRepository;
+import org.example.v1.chat.repository.*;
+import org.example.v1.comment.repository.CommunityCommentRepository;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.post.community.domain.Community;
+import org.example.v1.post.community.domain.CommunityJoin;
+import org.example.v1.post.community.repository.CommunityJoinRepository;
+import org.example.v1.post.community.repository.CommunityRepository;
+import org.example.v1.post.community.service.CommunityService;
+import org.example.v1.post.repository.PostRepository;
+import org.example.v1.postLike.repository.PostLikeRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +32,23 @@ public class ChatService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ReadStatusRepository readStatusRepository;
     private final MemberRepository memberRepository;
+    private final GroupChatRoomOwnerRepository groupChatRoomOwnerRepository;
+    private final CommunityRepository communityRepository;
+    private final CommunityCommentRepository communityCommentRepository;
+    private final CommunityJoinRepository communityJoinRepository;
+    private final PostLikeRepository postLikeRepository;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ChatParticipantRepository chatParticipantRepository, ReadStatusRepository readStatusRepository, MemberRepository memberRepository) {
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ChatParticipantRepository chatParticipantRepository, ReadStatusRepository readStatusRepository, MemberRepository memberRepository, GroupChatRoomOwnerRepository groupChatRoomOwnerRepository, CommunityRepository communityRepository, CommunityCommentRepository communityCommentRepository, CommunityJoinRepository communityJoinRepository, PostLikeRepository postLikeRepository) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.readStatusRepository = readStatusRepository;
         this.memberRepository = memberRepository;
+        this.groupChatRoomOwnerRepository = groupChatRoomOwnerRepository;
+        this.communityRepository = communityRepository;
+        this.communityCommentRepository = communityCommentRepository;
+        this.communityJoinRepository = communityJoinRepository;
+        this.postLikeRepository = postLikeRepository;
     }
     public void beforeSaveMessage(Long roomId, ChatMessageDto chatMessageDto) {
         //        채팅방 조회
@@ -100,7 +112,13 @@ public class ChatService {
                 .chatRoom(chatRoom)
                 .member(member)
                 .build();
+        GroupChatRoomOwner owner = GroupChatRoomOwner.builder()
+                .chatRoom(chatRoom)
+                .community(communityRepository.findById(1L).get())
+                .owner(member)
+                .build();
         chatParticipantRepository.save(chatParticipant);
+        groupChatRoomOwnerRepository.save(owner);
     }
 
     public List<ChatRoomListResponseDto> getGroupChatRooms(){
@@ -135,6 +153,21 @@ public class ChatService {
 
 //        ChatParticipants 객체 생성 후 저장
     }
+    public void addParticipantToCommunityChat(Long roomId, String email){
+//        채팅방 조회
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(()-> new EntityNotFoundException("Room not found"));
+//        member 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(()-> new EntityNotFoundException("Member not found"));
+        if(chatRoom.getIsGroupChat().equals("N"))
+            throw new IllegalArgumentException("채팅 참여 권한이 없습니다.");
+//        이미 참여자인지 검증
+        Optional<ChatParticipant> participant =  chatParticipantRepository.findByChatRoomAndMember(chatRoom, member);
+        if(!participant.isPresent()){
+            addParticipantToRoom(chatRoom, member);
+        }
+    }
     public void addParticipantToRoom(ChatRoom chatRoom, Member member){
         ChatParticipant chatParticipant = ChatParticipant.builder()
                 .chatRoom(chatRoom)
@@ -167,6 +200,7 @@ public class ChatService {
             ChatMessageDto chatMessageDto = ChatMessageDto.builder()
                     .message(m.getContent())
                     .senderEmail(m.getMember().getEmail())
+                    .senderNickname(m.getMember().getNickname())
                     .createdTime(m.getCreatedTime())
                     .build();
             dtos.add(chatMessageDto);
@@ -274,7 +308,7 @@ public class ChatService {
     }
 
 
-    public void leaveGroupChatRoom(Long roomId){
+    public void leaveChatRoom(Long roomId){
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(()-> new EntityNotFoundException("Room not found"));
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -300,6 +334,55 @@ public class ChatService {
 //        }
     }
 
+    public void leaveGroupChatRoom(Long roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+        if(chatRoom.getIsGroupChat().equals("N")){
+            throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
+        }
+        ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member).orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+        chatParticipantRepository.delete(c);
+
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        GroupChatRoomOwner groupChatRoomOwner = groupChatRoomOwnerRepository.findByChatRoom(chatRoom)
+                .orElseThrow(()-> new EntityNotFoundException("방장이 이미 나갔습니다."));
+        Community community = groupChatRoomOwner.getCommunity();
+        if(chatParticipants.isEmpty() || groupChatRoomOwner.getOwner().equals(member)){
+            groupChatRoomOwnerRepository.delete(groupChatRoomOwner);
+            chatRoomRepository.delete(chatRoom);
+            communityCommentRepository.deleteAllByCommunity(community);
+            postLikeRepository.deleteAllByPost(community);
+            communityRepository.delete(community);
+        }else{
+            Optional<CommunityJoin> byCommunityAndParticipant = communityJoinRepository.findByCommunityAndParticipant(community, member);
+            byCommunityAndParticipant.ifPresent(communityJoinRepository::delete);
+            community.decrementCurrentParticipants();
+            communityRepository.save(community);
+        }
+    }
+
+    public void leaveCommunityChatRoom(Long roomId, String email){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
+        Member member = memberRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+        if(chatRoom.getIsGroupChat().equals("N")){
+            throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
+        }
+        ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member).orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+        chatParticipantRepository.delete(c);
+
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        GroupChatRoomOwner groupChatRoomOwner = groupChatRoomOwnerRepository.findByChatRoom(chatRoom)
+                .orElseThrow(()-> new EntityNotFoundException("방장이 이미 나갔습니다."));
+        Community community = groupChatRoomOwner.getCommunity();
+        if(chatParticipants.isEmpty() || groupChatRoomOwner.getOwner().equals(member)){
+            groupChatRoomOwnerRepository.delete(groupChatRoomOwner);
+            chatRoomRepository.delete(chatRoom);
+            communityCommentRepository.deleteAllByCommunity(community);
+            postLikeRepository.deleteAllByPost(community);
+            communityRepository.delete(community);
+        }
+    }
+
     public Long getOrCreatePrivateRoom(Long otherMemberId){
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
                 .orElseThrow(()-> new EntityNotFoundException("Member1 not found"));
@@ -313,7 +396,7 @@ public class ChatService {
             ChatParticipant participant = chatParticipantRepository.findByChatRoomAndMember(existingRoom, member)
                     .orElseThrow(() -> new EntityNotFoundException("Participant not found"));
 
-            // ⭐ 이미 존재하는 채팅방이면 isLeft를 false로 되돌립니다.
+            //  이미 존재하는 채팅방이면 isLeft를 false로 되돌립니다.
             if (participant.isLeft()) {
                 participant.setIsLeft(false);
                 chatParticipantRepository.save(participant);
