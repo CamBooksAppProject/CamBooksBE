@@ -115,7 +115,7 @@ public class UsedTradeService {
                 post.getPrice(),
                 post.getTradeMethod().toString(),
                 post.getViewCount(),
-                post.getWriter().getName(),
+                post.getWriter().getNickname(),
                 post.getWriter().getUniversity().getNameKo(),
                 post.getClass().getSimpleName(),
                 postLikeRepository.countByPost(post),

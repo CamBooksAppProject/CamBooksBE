@@ -13,5 +13,6 @@ import java.time.LocalDateTime;
 public class ChatMessageDto {
     private String message;
     private String senderEmail;
+    private String senderNickname;
     private LocalDateTime createdTime;
 }
