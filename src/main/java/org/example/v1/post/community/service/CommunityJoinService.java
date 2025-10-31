@@ -44,6 +44,14 @@ public class CommunityJoinService {
         this.chatService = chatService;
     }
 
+
+    public boolean getJoinStatus(String email, Long communityId) {
+        Member participant = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new RuntimeException("Community not found"));
+        return communityJoinRepository.existsByCommunityAndParticipant(community, participant);
+    }
 //    @Transactional
 //    public Integer joinAndLeaveCommunity(String email, Long communityId) {
 //        Member participant = memberRepository.findByEmail(email)
