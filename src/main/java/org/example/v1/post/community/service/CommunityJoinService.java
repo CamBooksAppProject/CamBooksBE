@@ -84,6 +84,9 @@ public class CommunityJoinService {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new IllegalArgumentException("커뮤니티가 존재하지 않습니다."));
         Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByOwner(community.getWriter());
+        if(email.equals(community.getWriter().getEmail())) {
+            throw new IllegalArgumentException("작성자는 참가할 수 없습니다.");
+        }
         ChatRoom chatRoom = byOwner.map(GroupChatRoomOwner::getChatRoom).orElse(null);
 
         // 이미 참여 중인 경우 → 탈퇴
