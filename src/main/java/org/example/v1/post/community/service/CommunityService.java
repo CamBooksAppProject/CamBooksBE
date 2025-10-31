@@ -210,7 +210,7 @@ public class CommunityService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
         Community community = communityRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글 없음"));
-        Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByOwner(community.getWriter());
+        Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByCommunity(community);
         ChatRoom chatRoom = byOwner.map(GroupChatRoomOwner::getChatRoom).orElse(null);
         if(community.getWriter().getId().equals(member.getId())){
             if(chatRoom != null) {

@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface GroupChatRoomOwnerRepository extends JpaRepository<GroupChatRoomOwner, Long> {
-    Optional<GroupChatRoomOwner> findByOwner(Member owner);
     Optional<GroupChatRoomOwner> findByChatRoom(ChatRoom chatRoom);
     Optional<GroupChatRoomOwner> findByCommunity(Community community);
 }

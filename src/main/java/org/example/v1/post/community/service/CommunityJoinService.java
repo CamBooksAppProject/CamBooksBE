@@ -83,7 +83,7 @@ public class CommunityJoinService {
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new IllegalArgumentException("커뮤니티가 존재하지 않습니다."));
-        Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByOwner(community.getWriter());
+        Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByCommunity(community);
         if(email.equals(community.getWriter().getEmail())) {
             throw new IllegalArgumentException("작성자는 참가할 수 없습니다.");
         }
