@@ -1,6 +1,7 @@
 package org.example.v1.post.community.controller;
 
 
+import org.example.v1.post.community.dto.CommunityJoinResponse;
 import org.example.v1.post.community.service.CommunityJoinService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +22,7 @@ public class CommunityJoinController {
     }
 
     @PostMapping("/{communityId}")
-    public ResponseEntity<Integer> joinCommunity(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long communityId) {
+    public ResponseEntity<CommunityJoinResponse> joinCommunity(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long communityId) {
         String email = userDetails.getUsername();
         return ResponseEntity.ok(communityJoinService.joinAndLeaveCommunity(email, communityId));
     }

@@ -12,6 +12,7 @@ import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.post.community.domain.Community;
 import org.example.v1.post.community.domain.CommunityJoin;
+import org.example.v1.post.community.dto.CommunityJoinResponse;
 import org.example.v1.post.community.repository.CommunityJoinRepository;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.springframework.stereotype.Service;
@@ -43,36 +44,85 @@ public class CommunityJoinService {
         this.chatService = chatService;
     }
 
+//    @Transactional
+//    public Integer joinAndLeaveCommunity(String email, Long communityId) {
+//        Member participant = memberRepository.findByEmail(email)
+//                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+//        Community community = communityRepository.findById(communityId)
+//                .orElseThrow(() -> new IllegalArgumentException("커뮤니티가 존재하지 않습니다."));
+//        Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByOwner(community.getWriter());
+//        ChatRoom chatRoom = byOwner.map(GroupChatRoomOwner::getChatRoom).orElse(null);
+//        return communityJoinRepository.findByCommunityAndParticipant(community, participant)
+//                .map(join -> {
+//                    if(chatRoom != null) {
+//                        chatService.leaveCommunityChatRoom(chatRoom.getId(), email);
+//                    }
+//                    communityJoinRepository.delete(join);
+//                    community.decrementCurrentParticipants();
+//                    communityRepository.save(community);
+//                    return community.getCurrentParticipants();
+//                })
+//                .orElseGet(()->{
+//                    if (community.getCurrentParticipants() >= community.getMaxParticipants()) {
+//                        throw new IllegalStateException("모집 인원이 가득 찼습니다.");
+//                    }
+//
+//                    chatService.addParticipantToCommunityChat(chatRoom.getId(), email);
+//
+//                    CommunityJoin join = new CommunityJoin(null, community, participant);
+//                    communityJoinRepository.save(join);
+//                    community.incrementCurrentParticipants();
+//                    communityRepository.save(community);
+//                    return community.getCurrentParticipants();
+//                });
+//    }
+
     @Transactional
-    public Integer joinAndLeaveCommunity(String email, Long communityId) {
+    public CommunityJoinResponse joinAndLeaveCommunity(String email, Long communityId) {
         Member participant = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new IllegalArgumentException("커뮤니티가 존재하지 않습니다."));
         Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByOwner(community.getWriter());
         ChatRoom chatRoom = byOwner.map(GroupChatRoomOwner::getChatRoom).orElse(null);
+
+        // 이미 참여 중인 경우 → 탈퇴
         return communityJoinRepository.findByCommunityAndParticipant(community, participant)
                 .map(join -> {
-                    if(chatRoom != null) {
+                    if (chatRoom != null) {
                         chatService.leaveCommunityChatRoom(chatRoom.getId(), email);
                     }
                     communityJoinRepository.delete(join);
                     community.decrementCurrentParticipants();
                     communityRepository.save(community);
-                    return community.getCurrentParticipants();
+
+                    // 탈퇴 후 상태
+                    return CommunityJoinResponse.builder()
+                            .currentParticipants(community.getCurrentParticipants())
+                            .isJoined(false)
+                            .build();
                 })
-                .orElseGet(()->{
+                // 참여하지 않은 경우 → 신규 참가
+                .orElseGet(() -> {
                     if (community.getCurrentParticipants() >= community.getMaxParticipants()) {
                         throw new IllegalStateException("모집 인원이 가득 찼습니다.");
                     }
 
-                    chatService.addParticipantToCommunityChat(chatRoom.getId(), email);
+                    if (chatRoom != null) {
+                        chatService.addParticipantToCommunityChat(chatRoom.getId(), email);
+                    }
 
                     CommunityJoin join = new CommunityJoin(null, community, participant);
                     communityJoinRepository.save(join);
                     community.incrementCurrentParticipants();
                     communityRepository.save(community);
-                    return community.getCurrentParticipants();
+
+                    // 참여 후 상태
+                    return CommunityJoinResponse.builder()
+                            .currentParticipants(community.getCurrentParticipants())
+                            .isJoined(true)
+                            .build();
                 });
     }
+
 }
