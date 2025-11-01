@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,4 +16,5 @@ public class NotificationResponseDto {
     private Long noticeTypeId;
     private Long navigateId;
     private String content;
+    private LocalDateTime createdAt;
 }

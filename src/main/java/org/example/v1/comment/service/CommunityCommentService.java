@@ -68,6 +68,7 @@ public class CommunityCommentService {
                     .content(comment.getWriter().getNickname()+"님이 [" + commu.getTitle() + "] 모집글에 댓글을 남겼습니다.")
                     .navigateId(commu.getId())
                     .member(commu.getWriter())
+                    .createTime(LocalDateTime.now())
                     .build();
             notificationRepository.save(notification);
         }

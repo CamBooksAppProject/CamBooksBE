@@ -67,6 +67,7 @@ public class CommentService {
                     .content(comment.getWriter().getNickname()+"님이 [" + generalForum.getTitle() + "] 게시글에 댓글을 남겼습니다.")
                     .navigateId(generalForum.getId())
                     .member(generalForum.getWriter())
+                    .createTime(LocalDateTime.now())
                     .build();
             notificationRepository.save(notification);
         }

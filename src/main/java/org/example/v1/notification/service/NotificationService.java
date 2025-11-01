@@ -1,6 +1,7 @@
 package org.example.v1.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
 import org.example.v1.notification.domain.Notification;
@@ -33,11 +34,20 @@ public class NotificationService {
                         .noticeTypeId(notification.getNotificationType().getId())
                         .navigateId(notification.getNavigateId())
                         .content(notification.getContent())
+                        .createdAt(notification.getCreateTime())
                         .build());
             }
             return notificationResponseDtos;
         }
         return null;
+    }
+
+    @Transactional
+    public  boolean deleteMyNotifications(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(()-> new EntityNotFoundException("Member not found - " + email));
+        notificationRepository.deleteAllByMember(member);
+        return true;
     }
 
 }

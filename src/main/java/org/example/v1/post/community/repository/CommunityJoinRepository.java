@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,5 @@ public interface CommunityJoinRepository extends JpaRepository<CommunityJoin, Lo
     boolean existsByCommunityAndParticipant(Community community, Member participant);
     void deleteAllByParticipant(Member participant);
     Optional<CommunityJoin> findByCommunityAndParticipant(Community community, Member participant);
+    List<CommunityJoin> findByCommunity(Community community);
 }

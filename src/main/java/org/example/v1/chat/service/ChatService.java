@@ -387,7 +387,8 @@ public class ChatService {
             throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
         }
         ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member).orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
-                chatParticipantRepository.delete(c);
+
+        chatParticipantRepository.delete(c);
 
                 // publish leave event to websocket topic so clients can render system message
                         try {

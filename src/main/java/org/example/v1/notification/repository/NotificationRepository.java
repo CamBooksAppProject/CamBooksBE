@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findAllByMember(Member member);
+    void deleteAllByMember(Member member);
 }

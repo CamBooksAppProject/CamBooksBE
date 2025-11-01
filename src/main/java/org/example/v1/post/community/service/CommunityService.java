@@ -13,10 +13,16 @@ import org.example.v1.comment.repository.CommunityCommentRepository;
 import org.example.v1.comment.service.CommunityCommentService;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
+import org.example.v1.notification.domain.Notification;
+import org.example.v1.notification.domain.NotificationType;
+import org.example.v1.notification.repository.NotificationRepository;
+import org.example.v1.notification.repository.NotificationTypeRepository;
 import org.example.v1.post.community.domain.Community;
+import org.example.v1.post.community.domain.CommunityJoin;
 import org.example.v1.post.community.dto.CommunityPreviewDto;
 import org.example.v1.post.community.dto.CommunityRequestDto;
 import org.example.v1.post.community.dto.CommunityResponseDto;
+import org.example.v1.post.community.repository.CommunityJoinRepository;
 import org.example.v1.post.community.repository.CommunityRepository;
 import org.example.v1.post.image.domain.CommunityImage;
 import org.example.v1.post.image.repository.CommunityImageRepository;
@@ -47,8 +53,11 @@ public class CommunityService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final GroupChatRoomOwnerRepository groupChatRoomOwnerRepository;
     private final ChatService chatService;
+    private final NotificationRepository notificationRepository;
+    private final NotificationTypeRepository notificationTypeRepository;
+    private final CommunityJoinRepository communityJoinRepository;
 
-    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentRepository communityCommentRepository, CommunityCommentService communityCommentService, PostLikeRepository postLikeRepository, ChatService chatService, ChatRoomRepository chatRoomRepository, ChatParticipantRepository chatParticipantRepository, GroupChatRoomOwnerRepository groupChatRoomOwnerRepository, ChatService chatService1) {
+    public CommunityService(CommunityRepository communityRepository, MemberRepository memberRepository, CommunityImageRepository communityImageRepository, CommunityCommentRepository communityCommentRepository, CommunityCommentService communityCommentService, PostLikeRepository postLikeRepository, ChatService chatService, ChatRoomRepository chatRoomRepository, ChatParticipantRepository chatParticipantRepository, GroupChatRoomOwnerRepository groupChatRoomOwnerRepository, ChatService chatService1, NotificationRepository notificationRepository, NotificationTypeRepository notificationTypeRepository, CommunityJoinRepository communityJoinRepository) {
         this.communityRepository = communityRepository;
         this.memberRepository = memberRepository;
         this.communityImageRepository = communityImageRepository;
@@ -59,6 +68,9 @@ public class CommunityService {
         this.chatParticipantRepository = chatParticipantRepository;
         this.groupChatRoomOwnerRepository = groupChatRoomOwnerRepository;
         this.chatService = chatService1;
+        this.notificationRepository = notificationRepository;
+        this.notificationTypeRepository = notificationTypeRepository;
+        this.communityJoinRepository = communityJoinRepository;
     }
     public CommunityResponseDto create(String email, CommunityRequestDto dto, List<MultipartFile> images) {
         Member writer = memberRepository.findByEmail(email)
@@ -210,8 +222,21 @@ public class CommunityService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
         Community community = communityRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커뮤니티 글 없음"));
+        String title = community.getTitle();
+        List<CommunityJoin> communityJoins = communityJoinRepository.findByCommunity(community);
         Optional<GroupChatRoomOwner> byOwner = groupChatRoomOwnerRepository.findByCommunity(community);
         ChatRoom chatRoom = byOwner.map(GroupChatRoomOwner::getChatRoom).orElse(null);
+        NotificationType byId = notificationTypeRepository.findById(4L)
+                .orElseThrow(() -> new EntityNotFoundException("해당 타입의 NotificationType이 없습니다."));
+        for(CommunityJoin join : communityJoins){
+            Notification notification = Notification.builder()
+                    .notificationType(byId)
+                    .content("[" + title+ "] 커뮤니티가 삭제되었습니다.")
+                    .createTime(LocalDateTime.now())
+                    .member(join.getParticipant())
+                    .build();
+            notificationRepository.save(notification);
+        }
         if(community.getWriter().getId().equals(member.getId())){
             if(chatRoom != null) {
                 chatService.leaveCommunityChatRoom(chatRoom.getId(), email);

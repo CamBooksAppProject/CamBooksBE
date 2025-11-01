@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,14 +65,14 @@ public class MemberService {
 
     @Transactional
     public Member create(MemberSaveReqDto dto) {
-//        if (memberRepository.findByEmail(dto.getEmail()).isPresent()) {
-//            throw new IllegalStateException("이미 존재하는 이메일입니다.");
-//        }
-//
-//        // 🔐 이메일 인증 여부 확인
-//        if (!mailService.isVerified(dto.getEmail())) {
-//            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
-//        }
+        if (memberRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+        }
+
+        //  이메일 인증 여부 확인
+        if (!mailService.isVerified(dto.getEmail())) {
+            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+        }
 
         Member newMember = Member.builder()
                 .name(dto.getName())
@@ -95,6 +96,7 @@ public class MemberService {
                 .content(newMember.getNickname()+"님, 회원가입을 축하합니다.")
                 .navigateId(null)
                 .member(newMember)
+                .createTime(LocalDateTime.now())
                 .build();
         notificationRepository.save(notification);
 

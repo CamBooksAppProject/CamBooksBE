@@ -5,6 +5,8 @@ import lombok.*;
 import org.example.v1.common.domain.BaseTimeEntity;
 import org.example.v1.member.domain.Member;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -27,4 +29,6 @@ public class Notification extends BaseTimeEntity {
 
     @Column(length = 100)
     private String content;
+
+    private LocalDateTime createTime;
 }

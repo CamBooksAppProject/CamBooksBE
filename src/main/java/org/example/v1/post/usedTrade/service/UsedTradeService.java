@@ -1,5 +1,6 @@
 package org.example.v1.post.usedTrade.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
@@ -15,6 +16,7 @@ import org.example.v1.post.usedTrade.repository.UsedTradeRepository;
 import org.example.v1.post.usedTrade.repository.UsedTradeStatusRepository;
 import org.example.v1.postLike.repository.PostLikeRepository;
 import org.example.v1.searchResult.dto.SearchResultDto;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -97,6 +99,7 @@ public class UsedTradeService {
     }
 
     public UsedTradeResponseDto getById(Long postId) {
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new EntityNotFoundException("member cannot be found"));
         UsedTrade post = usedTradeRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
         UsedTradeStatus status = usedTradeStatusRepository.findByUsedTrade(post);
@@ -105,7 +108,9 @@ public class UsedTradeService {
         List<String> imageUrls = images.stream()
                 .map(PostImage::getImageUrl)
                 .toList();
-        post.increaseView();
+
+        if(!member.equals(post.getWriter()))
+            post.increaseView();
         usedTradeRepository.save(post);
 
         return new UsedTradeResponseDto(
