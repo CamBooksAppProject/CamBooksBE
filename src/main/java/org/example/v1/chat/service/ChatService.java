@@ -456,7 +456,8 @@ public class ChatService {
                 Long ownerMemberId = ownerObj != null && ownerObj.getOwner() != null ? ownerObj.getOwner().getId() : null;
 
                 for(ChatParticipant cp: chatParticipants){
-                        if (cp.getMember() == null) continue;
+                        // 나간 회원은 제외
+                        if (cp.getMember() == null || cp.isLeft()) continue;
                         org.example.v1.member.domain.Member m = cp.getMember();
                         org.example.v1.chat.dto.ChatParticipantResponseDto dto = org.example.v1.chat.dto.ChatParticipantResponseDto.builder()
                                 .id(m.getId())
