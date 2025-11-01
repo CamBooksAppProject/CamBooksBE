@@ -6,6 +6,11 @@ import org.example.v1.chat.dto.ChatMessageDto;
 import org.example.v1.chat.dto.ChatRoomListResponseDto;
 import org.example.v1.chat.dto.MyChatListResponseDto;
 import org.example.v1.chat.repository.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.beans.factory.ObjectProvider;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import org.example.v1.comment.repository.CommunityCommentRepository;
 import org.example.v1.member.domain.Member;
 import org.example.v1.member.repository.MemberRepository;
@@ -37,18 +42,20 @@ public class ChatService {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityJoinRepository communityJoinRepository;
     private final PostLikeRepository postLikeRepository;
+                private final ObjectProvider<SimpMessagingTemplate> simpMessagingTemplateProvider;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ChatParticipantRepository chatParticipantRepository, ReadStatusRepository readStatusRepository, MemberRepository memberRepository, GroupChatRoomOwnerRepository groupChatRoomOwnerRepository, CommunityRepository communityRepository, CommunityCommentRepository communityCommentRepository, CommunityJoinRepository communityJoinRepository, PostLikeRepository postLikeRepository) {
-        this.chatRoomRepository = chatRoomRepository;
-        this.chatMessageRepository = chatMessageRepository;
-        this.chatParticipantRepository = chatParticipantRepository;
-        this.readStatusRepository = readStatusRepository;
-        this.memberRepository = memberRepository;
-        this.groupChatRoomOwnerRepository = groupChatRoomOwnerRepository;
-        this.communityRepository = communityRepository;
-        this.communityCommentRepository = communityCommentRepository;
-        this.communityJoinRepository = communityJoinRepository;
-        this.postLikeRepository = postLikeRepository;
+                public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ChatParticipantRepository chatParticipantRepository, ReadStatusRepository readStatusRepository, MemberRepository memberRepository, GroupChatRoomOwnerRepository groupChatRoomOwnerRepository, CommunityRepository communityRepository, CommunityCommentRepository communityCommentRepository, CommunityJoinRepository communityJoinRepository, PostLikeRepository postLikeRepository, ObjectProvider<SimpMessagingTemplate> simpMessagingTemplateProvider) {
+                this.chatRoomRepository = chatRoomRepository;
+                this.chatMessageRepository = chatMessageRepository;
+                this.chatParticipantRepository = chatParticipantRepository;
+                this.readStatusRepository = readStatusRepository;
+                this.memberRepository = memberRepository;
+                this.groupChatRoomOwnerRepository = groupChatRoomOwnerRepository;
+                this.communityRepository = communityRepository;
+                this.communityCommentRepository = communityCommentRepository;
+                this.communityJoinRepository = communityJoinRepository;
+                this.postLikeRepository = postLikeRepository;
+                        this.simpMessagingTemplateProvider = simpMessagingTemplateProvider;
     }
     public void beforeSaveMessage(Long roomId, ChatMessageDto chatMessageDto) {
         //        채팅방 조회
@@ -174,6 +181,24 @@ public class ChatService {
                 .member(member)
                 .build();
         chatParticipantRepository.save(chatParticipant);
+                // publish join event so clients can show system message
+                try {
+                                        SimpMessagingTemplate tmpl = simpMessagingTemplateProvider.getIfAvailable();
+                                        if (tmpl != null) {
+                                                Map<String, Object> payload = new HashMap<>();
+                                                payload.put("type", "JOIN");
+                                                payload.put("senderEmail", member.getEmail());
+                                                payload.put("nickname", member.getNickname());
+                                                payload.put("message", member.getNickname() + "님이 채팅방에 들어왔습니다.");
+                                                payload.put("createdTime", LocalDateTime.now().toString());
+                                                System.out.println("[ChatService] Sending JOIN to /topic/" + chatRoom.getId() + " payload=" + payload);
+                                                tmpl.convertAndSend("/topic/" + chatRoom.getId(), payload);
+                                        } else {
+                                                System.out.println("[ChatService] SimpMessagingTemplate not available - cannot send JOIN for room " + chatRoom.getId());
+                                        }
+                } catch (Exception ex) {
+                        System.out.println("Failed to send join websocket event: " + ex.getMessage());
+                }
     }
 
     public List<ChatMessageDto> getChatHistory(Long roomId){
@@ -318,7 +343,28 @@ public class ChatService {
 //        }
         ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member)
                 .orElseThrow(()-> new EntityNotFoundException("Participant not found"));
-        c.setIsLeft(true);
+                c.setIsLeft(true);
+                // persist change
+                chatParticipantRepository.save(c);
+
+                // publish leave event to websocket topic so clients can render system message
+                        try {
+                                                SimpMessagingTemplate tmpl = simpMessagingTemplateProvider.getIfAvailable();
+                                                if (tmpl != null) {
+                                                        Map<String, Object> payload = new HashMap<>();
+                                                        payload.put("type", "LEAVE");
+                                                        payload.put("senderEmail", member.getEmail());
+                                                        payload.put("nickname", member.getNickname());
+                                                        payload.put("message", member.getNickname() + "님이 채팅방을 나갔습니다.");
+                                                        payload.put("createdTime", LocalDateTime.now().toString());
+                                                        System.out.println("[ChatService] Sending LEAVE to /topic/" + roomId + " payload=" + payload);
+                                                        tmpl.convertAndSend("/topic/" + roomId, payload);
+                                                } else {
+                                                        System.out.println("[ChatService] SimpMessagingTemplate not available - cannot send LEAVE for room " + roomId);
+                                                }
+                        } catch (Exception ex) {
+                                System.out.println("Failed to send leave websocket event: " + ex.getMessage());
+                        }
 //        chatParticipantRepository.delete(c);
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
         int left = 1;
@@ -341,7 +387,23 @@ public class ChatService {
             throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
         }
         ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member).orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
-        chatParticipantRepository.delete(c);
+                chatParticipantRepository.delete(c);
+
+                // publish leave event to websocket topic so clients can render system message
+                        try {
+                                SimpMessagingTemplate tmpl = simpMessagingTemplateProvider.getIfAvailable();
+                                if (tmpl != null) {
+                                        Map<String, Object> payload = new HashMap<>();
+                                        payload.put("type", "LEAVE");
+                                        payload.put("senderEmail", member.getEmail());
+                                        payload.put("nickname", member.getNickname());
+                                        payload.put("message", member.getNickname() + "님이 채팅방을 나갔습니다.");
+                                        payload.put("createdTime", LocalDateTime.now().toString());
+                                        tmpl.convertAndSend("/topic/" + roomId, payload);
+                                }
+                        } catch (Exception ex) {
+                                System.out.println("Failed to send leave websocket event: " + ex.getMessage());
+                        }
 
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
         GroupChatRoomOwner groupChatRoomOwner = groupChatRoomOwnerRepository.findByChatRoom(chatRoom)
@@ -382,6 +444,31 @@ public class ChatService {
             communityRepository.delete(community);
         }
     }
+
+        public List<org.example.v1.chat.dto.ChatParticipantResponseDto> getRoomParticipants(Long roomId){
+                ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                                .orElseThrow(()-> new EntityNotFoundException("Room not found"));
+                List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+                List<org.example.v1.chat.dto.ChatParticipantResponseDto> participantDtos = new ArrayList<>();
+
+                // determine owner if any
+                org.example.v1.chat.domain.GroupChatRoomOwner ownerObj = groupChatRoomOwnerRepository.findByChatRoom(chatRoom).orElse(null);
+                Long ownerMemberId = ownerObj != null && ownerObj.getOwner() != null ? ownerObj.getOwner().getId() : null;
+
+                for(ChatParticipant cp: chatParticipants){
+                        if (cp.getMember() == null) continue;
+                        org.example.v1.member.domain.Member m = cp.getMember();
+                        org.example.v1.chat.dto.ChatParticipantResponseDto dto = org.example.v1.chat.dto.ChatParticipantResponseDto.builder()
+                                .id(m.getId())
+                                .email(m.getEmail())
+                                .nickname(m.getNickname())
+                                .profileImage(m.getProfileImage())
+                                .isOwner(ownerMemberId != null && ownerMemberId.equals(m.getId()))
+                                .build();
+                        participantDtos.add(dto);
+                }
+                return participantDtos;
+        }
 
     public Long getOrCreatePrivateRoom(Long otherMemberId){
         Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())

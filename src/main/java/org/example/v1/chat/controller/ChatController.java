@@ -81,4 +81,10 @@ public class ChatController {
         chatService.leaveGroupChatRoom(roomId);
         return ResponseEntity.ok().build();
     }
+
+    // 채팅방 참여자 목록 조회
+    @GetMapping("/room/{roomId}/participants")
+    public ResponseEntity<?> getRoomParticipants(@PathVariable Long roomId){
+        return new ResponseEntity<>(chatService.getRoomParticipants(roomId), HttpStatus.OK);
+    }
 }
