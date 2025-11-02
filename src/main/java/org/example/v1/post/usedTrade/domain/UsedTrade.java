@@ -24,6 +24,7 @@ public class UsedTrade extends Post {
     private Integer viewCount;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private TradeMethod tradeMethod;
 
     public UsedTrade(String title, Member writer, LocalDateTime createdAt,

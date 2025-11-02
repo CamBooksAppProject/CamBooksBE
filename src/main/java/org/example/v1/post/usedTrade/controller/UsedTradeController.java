@@ -49,6 +49,11 @@ public class UsedTradeController {
         return ResponseEntity.ok(usedTradeService.getById(postId));
     }
 
+    @GetMapping("/{postId}/banner")
+    public ResponseEntity<UsedTradeResponseDto> getByIdForBanner(@PathVariable Long postId) {
+        return ResponseEntity.ok(usedTradeService.getById(postId));
+    }
+
     @PutMapping("/{postId}")
     public ResponseEntity<UsedTradeResponseDto> update(@PathVariable Long postId, @RequestParam Long memberId, @RequestBody UsedTradeRequestDto dto) {
         UsedTradeResponseDto updated = usedTradeService.update(postId, memberId, dto);

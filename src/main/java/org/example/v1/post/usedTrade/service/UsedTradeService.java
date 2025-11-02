@@ -131,6 +131,35 @@ public class UsedTradeService {
         );
     }
 
+    public UsedTradeResponseDto getByIdForBanner(Long postId) {
+        UsedTrade post = usedTradeRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않음"));
+        UsedTradeStatus status = usedTradeStatusRepository.findByUsedTrade(post);
+
+        List<PostImage> images = postImageRepository.findByUsedTrade(post);
+        List<String> imageUrls = images.stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+        usedTradeRepository.save(post);
+
+        return new UsedTradeResponseDto(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getPrice(),
+                post.getTradeMethod().toString(),
+                post.getViewCount(),
+                post.getWriter().getNickname(),
+                post.getWriter().getUniversity().getNameKo(),
+                post.getClass().getSimpleName(),
+                postLikeRepository.countByPost(post),
+                imageUrls,
+                post.getWriter().getId(),
+                status.getStatus(),
+                post.getIsbn()
+        );
+    }
+
     public List<UsedTradePreviewDto> getAll() {
         List<UsedTrade> posts = usedTradeRepository.findAll();
         return getUsedTradePreviewDto(posts);
