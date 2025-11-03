@@ -51,7 +51,7 @@ public class UsedTradeController {
 
     @GetMapping("/{postId}/banner")
     public ResponseEntity<UsedTradeResponseDto> getByIdForBanner(@PathVariable Long postId) {
-        return ResponseEntity.ok(usedTradeService.getById(postId));
+        return ResponseEntity.ok(usedTradeService.getByIdForBanner(postId));
     }
 
     @PutMapping("/{postId}")
