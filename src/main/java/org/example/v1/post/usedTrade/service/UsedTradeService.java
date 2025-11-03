@@ -174,7 +174,7 @@ public class UsedTradeService {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
         usedTradeStatus.setStatus(dto.getStatus());
-        post.updateFields(dto.getTitle(), dto.getContent(), dto.getPrice(), dto.getTradeMethod());
+        post.updateFields(dto.getTitle(), dto.getContent(), dto.getPrice(), dto.getTradeMethod(), dto.getIsbn());
 
         UsedTradeStatus savedStatus = usedTradeStatusRepository.save(usedTradeStatus);
         UsedTrade saved = usedTradeRepository.save(post);

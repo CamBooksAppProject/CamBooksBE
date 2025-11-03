@@ -64,7 +64,7 @@ public class GeneralForumService {
                 generalForum.getId(),
                 generalForum.getTitle(),
                 generalForum.getContent(),
-                generalForum.getWriter().getName(),
+                generalForum.getWriter().getNickname(),
                 generalForum.getCreatedAt(),
                 postLikeRepository.countByPost(generalForum),
                 commentService.getCommentList(generalForum.getId()),
@@ -83,7 +83,7 @@ public class GeneralForumService {
                             post.getId(),
                             post.getTitle(),
                             post.getContent(),
-                            post.getWriter().getName(),
+                            post.getWriter().getNickname(),
                             post.getCreatedAt(),
                             postLikeRepository.countByPost(post),
                             commentService.countComment(post.getId())

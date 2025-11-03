@@ -36,11 +36,12 @@ public class UsedTrade extends Post {
         this.viewCount = viewCount;
         this.tradeMethod = tradeMethod;
     }
-    public void updateFields(String title, String content, Integer price, TradeMethod tradeMethod) {
+    public void updateFields(String title, String content, Integer price, TradeMethod tradeMethod, String isbn) {
         if (title != null) super.setTitle(title);
         if (content != null) this.content = content;
         if (price != null) this.price = price;
         if (tradeMethod != null) this.tradeMethod = tradeMethod;
+        if(isbn != null) this.isbn = isbn;
     }
     @OneToMany(mappedBy = "usedTrade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> images = new ArrayList<>();
